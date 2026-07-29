@@ -1,0 +1,19 @@
+{
+  "id": "camino-ingles-etapa-4",
+  "camino": "Camino Inglés",
+  "etapa": 4,
+  "origen": "Betanzos",
+  "destino": "Hospital de Bruma",
+  "distanciaTotalKm": 24.3,
+  "desnivelPositivoM": 520,
+  "dificultad": "Alta",
+  "proximoServicio": {
+    "nombre": "Mesón O Pote",
+    "tipo": "Restaurante",
+    "distanciaM": 778
+  },
+  "siguienteIndicacion": {
+    "distanciaM": 840,
+    "texto": "Gira a la izquierda al salir de la Plaza García Hermanos"
+  }
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "id": "albergue-presedo",
+    "nombre": "Albergue de Peregrinos de Presedo",
+    "tipo": "Albergue Público",
+    "precio": "10€",
+    "reserva": "Sin reserva",
+    "localidad": "Presedo",
+    "valoracion": 4.4,
+    "descripcion": "Albergue de la Xunta para dividir la etapa (16 plazas). Cocina, duchas calientes y tendedero."
+  },
+  {
+    "id": "albergue-bruma",
+    "nombre": "Albergue Público de Peregrinos de Bruma",
+    "tipo": "Albergue Público",
+    "precio": "10€",
+    "reserva": "Sin reserva",
+    "localidad": "Hospital de Bruma",
+    "valoracion": 4.6,
+    "descripcion": "Albergue oficial en el cruce histórico con la variante de A Coruña. 32 plazas en literas."
+  },
+  {
+    "id": "casa-grana",
+    "nombre": "Casa Graña – Albergue & Bar",
+    "tipo": "Albergue Privado / Hostal",
+    "precio": "Reserva disponible",
+    "reserva": "Con reserva",
+    "localidad": "Hospital de Bruma",
+    "valoracion": 4.8,
+    "descripcion": "Alojamiento privado en meta con habitaciones individuales, literas y restaurante con terraza."
+  }
+]
