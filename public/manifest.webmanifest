@@ -1,0 +1,17 @@
+{
+  "name": "Camino Companion",
+  "short_name": "Camino",
+  "description": "Tu copiloto inteligente para el Camino de Santiago",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F8F6F0",
+  "theme_color": "#047857",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

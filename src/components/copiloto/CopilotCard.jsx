@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Navigation, Volume2, Utensils, MessageSquare, ArrowLeft } from 'lucide-react';
 import PeregrinoAiModal from '../ai/PeregrinoAiModal';
+import { useGeolocation } from '../../hooks/useGeolocation';
 
 export default function CopilotCard() {
   const [isAiOpen, setIsAiOpen] = useState(false);
+  const { latitude, longitude, speed, accuracy, loading, error } = useGeolocation();
 
   return (
     <div className="space-y-4">
@@ -23,29 +25,35 @@ export default function CopilotCard() {
         <p className="text-sm text-red-100 mt-1 font-medium">Estás a 862m de las flechas amarillas</p>
       </div>
 
-      {/* TARJETA 2: Copiloto Inteligente (Verde Oscuro) */}
+      {/* TARJETA 2: Copiloto Inteligente (Verde Oscuro con GPS Real) */}
       <div className="bg-stone-900 text-white rounded-3xl p-5 shadow-md border border-stone-800 space-y-4">
         {/* Cabecera del Copiloto */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping" />
+            <div className={`w-2.5 h-2.5 rounded-full ${loading ? 'bg-amber-400 animate-pulse' : 'bg-emerald-500 animate-ping'}`} />
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Copiloto Inteligente</span>
           </div>
           <div className="flex items-center gap-2">
             <button className="p-2 bg-stone-800 rounded-full text-stone-300 hover:text-white">
               <Volume2 size={16} />
             </button>
-            <span className="bg-stone-800 text-[10px] text-amber-400 font-semibold px-2.5 py-1 rounded-full border border-stone-700">
-              Buscando GPS...
+            <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full border ${
+              loading 
+                ? 'bg-stone-800 text-amber-400 border-stone-700' 
+                : error 
+                  ? 'bg-red-950 text-red-400 border-red-800'
+                  : 'bg-emerald-950 text-emerald-400 border-emerald-800'
+            }`}>
+              {loading ? 'Buscando GPS...' : error ? 'Sin acceso GPS' : `GPS Precisión: ${accuracy}m`}
             </span>
           </div>
         </div>
 
-        {/* Métricas: Ritmo, Falta, ETA */}
+        {/* Métricas: Ritmo Real, Falta, ETA */}
         <div className="grid grid-cols-3 gap-2 pt-1">
           <div className="bg-stone-800/80 p-3 rounded-2xl border border-stone-700/50 text-center">
             <span className="text-[10px] uppercase font-bold text-stone-400 block">Ritmo</span>
-            <span className="text-lg font-black text-white">0 <span className="text-xs font-normal text-stone-400">km/h</span></span>
+            <span className="text-lg font-black text-white">{speed} <span className="text-xs font-normal text-stone-400">km/h</span></span>
           </div>
           <div className="bg-stone-800/80 p-3 rounded-2xl border border-stone-700/50 text-center">
             <span className="text-[10px] uppercase font-bold text-stone-400 block">Falta</span>
@@ -74,7 +82,7 @@ export default function CopilotCard() {
         </div>
       </div>
 
-      {/* TARJETA 3: Asistente IA del Peregrino (Gradiente Verde) */}
+      {/* TARJETA 3: Asistente IA del Peregrino */}
       <button 
         onClick={() => setIsAiOpen(true)}
         className="w-full bg-gradient-to-r from-emerald-800 to-teal-900 text-white rounded-3xl p-5 text-left shadow-md hover:opacity-95 transition-all flex items-start justify-between group cursor-pointer"
@@ -100,7 +108,7 @@ export default function CopilotCard() {
         </div>
       </div>
 
-      {/* Modal interactivo de IA */}
+      {/* Modal de IA */}
       <PeregrinoAiModal isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} />
     </div>
   );
