@@ -2,7 +2,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { KalmanFilter } from '../services/gps/kalman';
 
-// Función auxiliar para calcular rumbo entre dos coordenadas (en grados)
 function calculateBearing(lat1, lon1, lat2, lon2) {
   const toRad = (deg) => (deg * Math.PI) / 180;
   const toDeg = (rad) => (rad * 180) / Math.PI;
@@ -25,9 +24,10 @@ export function useGeolocation(options = {}) {
     rawLongitude: null,
     accuracy: null,
     heading: null,
-    speed: null, // en m/s
+    speed: null,
     lastFixTime: null,
     error: null,
+    gpsStatus: 'SEARCHING', // 'EXCELLENT' (<=10m), 'GOOD' (<=25m), 'LOW' (>25m), 'SEARCHING' (null)
   });
 
   const kalmanRef = useRef(new KalmanFilter());
@@ -35,7 +35,7 @@ export function useGeolocation(options = {}) {
 
   useEffect(() => {
     if (!('geolocation' in navigator)) {
-      setLocation((prev) => ({ ...prev, error: 'Geolocalización no soportada.' }));
+      setLocation((prev) => ({ ...prev, error: 'Geolocalización no soportada.', gpsStatus: 'ERROR' }));
       return;
     }
 
@@ -48,11 +48,17 @@ export function useGeolocation(options = {}) {
 
     const handleSuccess = (position) => {
       const { latitude, longitude, accuracy, heading, speed } = position.coords;
+      const roundedAcc = Math.round(accuracy);
+
+      // Clasificación estricta de la calidad GPS para el Copiloto
+      let status = 'LOW';
+      if (roundedAcc <= 10) status = 'EXCELLENT';
+      else if (roundedAcc <= 25) status = 'GOOD';
 
       // 1. Filtrar con el Kalman Filter
       const filtered = kalmanRef.current.filter(latitude, longitude, accuracy);
 
-      // 2. Cálculo sintético de rumbo (Heading) si el dispositivo no lo provee o se camina despacio
+      // 2. Cálculo sintético de rumbo (Heading)
       let calculatedHeading = heading;
       if (
         (calculatedHeading === null || calculatedHeading === undefined || calculatedHeading === 0) &&
@@ -61,7 +67,6 @@ export function useGeolocation(options = {}) {
         const distMovedLat = Math.abs(filtered.lat - lastCoordsRef.current.lat);
         const distMovedLng = Math.abs(filtered.lng - lastCoordsRef.current.lng);
 
-        // Solo recalcular si se ha movido una distancia mínima signficativa para evitar ruidos
         if (distMovedLat > 0.00003 || distMovedLng > 0.00003) {
           calculatedHeading = calculateBearing(
             lastCoordsRef.current.lat,
@@ -74,7 +79,6 @@ export function useGeolocation(options = {}) {
         }
       }
 
-      // Guardar posición actual para la siguiente comparación de rumbo
       lastCoordsRef.current = {
         lat: filtered.lat,
         lng: filtered.lng,
@@ -87,16 +91,17 @@ export function useGeolocation(options = {}) {
         longitude: filtered.lng,
         rawLatitude: latitude,
         rawLongitude: longitude,
-        accuracy: Math.round(accuracy),
+        accuracy: roundedAcc,
         heading: calculatedHeading ? Math.round(calculatedHeading) : 0,
         speed: speed ?? 0,
         lastFixTime: new Date(position.timestamp),
         error: null,
+        gpsStatus: status,
       });
     };
 
     const handleError = (error) => {
-      setLocation((prev) => ({ ...prev, error: error.message }));
+      setLocation((prev) => ({ ...prev, error: error.message, gpsStatus: 'SEARCHING' }));
     };
 
     const watchId = navigator.geolocation.watchPosition(
