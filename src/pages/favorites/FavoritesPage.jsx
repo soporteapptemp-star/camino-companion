@@ -1,11 +1,11 @@
 import React from 'react';
-import { Bookmark, MapPin } from 'lucide-react';
-import poisBruma from '../../data/pois/bruma.json';
+import { Bookmark } from 'lucide-react';
+import poisEtapa4 from '../../data/pois/etapa4.pois.json';
 import PoiCard from '../../components/pois/PoiCard';
 
 export default function FavoritesPage() {
-  // Por ahora tomamos un par de POIs de muestra como guardados
-  const savedPois = poisBruma.slice(0, 2);
+  // Tomamos los albergues principales como favoritos por defecto para la demo de la etapa
+  const savedPois = poisEtapa4.filter((poi) => poi.categoria === 'alojamiento');
 
   return (
     <div className="space-y-4">
