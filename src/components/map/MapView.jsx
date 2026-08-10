@@ -153,12 +153,24 @@ export default function MapView() {
         <div className="bg-stone-900/90 text-white text-xs px-3 py-1.5 rounded-full backdrop-blur-md flex items-center gap-2 border border-white/10 shadow-lg pointer-events-auto">
           <span
             className={`w-2 h-2 rounded-full ${
-              location.accuracy && location.accuracy < 15
+              !location.accuracy
+                ? 'bg-stone-400'
+                : location.accuracy <= 10
                 ? 'bg-emerald-400 animate-pulse'
-                : 'bg-amber-400'
+                : location.accuracy <= 30
+                ? 'bg-amber-400'
+                : 'bg-rose-400'
             }`}
           />
-          <span className="font-medium">±{location.accuracy || '--'}m</span>
+          <span className="font-medium">
+            {!location.accuracy
+              ? 'Buscando GPS…'
+              : location.accuracy <= 10
+              ? `±${location.accuracy}m (Preciso)`
+              : location.accuracy <= 30
+              ? `±${location.accuracy}m (Bueno)`
+              : `±${location.accuracy}m (Débil)`}
+          </span>
         </div>
 
         <div
