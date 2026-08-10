@@ -1,0 +1,128 @@
+[
+  {
+    "id": "betanzos-farmacia-couceiro",
+    "nombre": "Farmacia Doctor Couceiro",
+    "categoria": "salud",
+    "subtipo": "farmacia",
+    "coordenadas": [43.2808, -8.2115],
+    "kmRuta": 0.20,
+    "distanciaOffsetM": 15,
+    "localidad": "Betanzos",
+    "descripcion": "Farmacia principal antes de iniciar el tramo rural.",
+    "verificacion": {
+      "estado": "verificado",
+      "fuente": "Sergas / Registro Sanitario Galego",
+      "fecha": "2026-08-10"
+    },
+    "contacto": { "telefono": "+34981770103" }
+  },
+  {
+    "id": "betanzos-super-gadis",
+    "nombre": "Supermercados Gadis",
+    "categoria": "comida",
+    "subtipo": "supermercado",
+    "coordenadas": [43.2801, -8.2128],
+    "kmRuta": 0.35,
+    "distanciaOffsetM": 40,
+    "localidad": "Betanzos",
+    "descripcion": "Supermercado completo para avituallamiento de agua y comida.",
+    "verificacion": {
+      "estado": "verificado",
+      "fuente": "Directorio Local",
+      "fecha": "2026-08-10"
+    }
+  },
+  {
+    "id": "betanzos-fuente-cascas",
+    "nombre": "Fuente de Ponte das Cascas",
+    "categoria": "agua",
+    "subtipo": "fuentepotable",
+    "coordenadas": [43.2786, -8.2106],
+    "kmRuta": 0.84,
+    "distanciaOffsetM": 0,
+    "localidad": "Betanzos",
+    "descripcion": "Fuente pública de agua potable junto al cruce del río.",
+    "verificacion": {
+      "estado": "verificado",
+      "fuente": "Concello de Betanzos",
+      "fecha": "2026-08-10"
+    }
+  },
+  {
+    "id": "presedo-albergue",
+    "nombre": "Albergue de Peregrinos de Presedo",
+    "categoria": "alojamiento",
+    "subtipo": "albergue_publico",
+    "coordenadas": [43.2148, -8.2615],
+    "kmRuta": 11.80,
+    "distanciaOffsetM": 0,
+    "localidad": "Presedo",
+    "precio": "10€",
+    "reserva": "Sin reserva",
+    "descripcion": "Albergue público de la Xunta (16 plazas). Cocina, duchas y tendedero.",
+    "verificacion": {
+      "estado": "verificado",
+      "fuente": "caminoingles.gal",
+      "fecha": "2026-08-10"
+    },
+    "servicios": ["wc", "sellado_credencial", "duchas"]
+  },
+  {
+    "id": "presedo-meson-xente",
+    "nombre": "Mesón Museo Xente no Camiño",
+    "categoria": "restauracion",
+    "subtipo": "meson",
+    "coordenadas": [43.2131, -8.2627],
+    "kmRuta": 12.10,
+    "distanciaOffsetM": 10,
+    "localidad": "Presedo",
+    "precio": "Menú disponible",
+    "reserva": "Recomendada",
+    "descripcion": "Restaurante e hito gastronómico en mitad de etapa. Menú del día y sellado.",
+    "verificacion": {
+      "estado": "verificado",
+      "fuente": "caminoingles.gal",
+      "fecha": "2026-08-10"
+    },
+    "contacto": { "telefono": "+34981770000" },
+    "servicios": ["comida_caliente", "sellado_credencial"]
+  },
+  {
+    "id": "bruma-albergue-san-lorenzo",
+    "nombre": "Albergue San Lorenzo de Bruma",
+    "categoria": "alojamiento",
+    "subtipo": "albergue_publico",
+    "coordenadas": [43.1511, -8.3640],
+    "kmRuta": 24.10,
+    "distanciaOffsetM": 0,
+    "localidad": "Hospital de Bruma",
+    "precio": "10€",
+    "reserva": "Sin reserva",
+    "descripcion": "Albergue público histórico en el enlace con la variante de A Coruña (32 plazas).",
+    "verificacion": {
+      "estado": "verificado",
+      "fuente": "caminoingles.gal",
+      "fecha": "2026-08-10"
+    },
+    "contacto": { "telefono": "+34649580309" },
+    "servicios": ["wc", "sellado_credencial", "literas"]
+  },
+  {
+    "id": "bruma-casa-grana",
+    "nombre": "Casa Graña – Albergue & Bar",
+    "categoria": "alojamiento",
+    "subtipo": "albergue_privado",
+    "coordenadas": [43.1512, -8.3641],
+    "kmRuta": 24.10,
+    "distanciaOffsetM": 15,
+    "localidad": "Hospital de Bruma",
+    "precio": "Con reserva",
+    "reserva": "Disponible",
+    "descripcion": "Alojamiento privado en meta con habitaciones individuales, literas y bar con terraza.",
+    "verificacion": {
+      "estado": "verificado",
+      "fuente": "Directorio Hostelería Galicia",
+      "fecha": "2026-08-10"
+    }
+  }
+]

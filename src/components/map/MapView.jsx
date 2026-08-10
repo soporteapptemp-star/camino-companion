@@ -5,8 +5,10 @@ import 'leaflet/dist/leaflet.css';
 import { useGeolocation } from '../../hooks/useGeolocation';
 import { useCompass } from '../../hooks/useCompass';
 import etapa4Data from '../../data/routes/camino-ingles/etapa4.json';
+import poisEtapa4 from '../../data/pois/etapa4.pois.json';
 import { Navigation, AlertTriangle, CheckCircle2, Compass } from 'lucide-react';
 
+// Icono del peregrino
 const createPilgrimIcon = (heading = 0) =>
   L.divIcon({
     className: 'custom-pilgrim-marker',
@@ -18,6 +20,29 @@ const createPilgrimIcon = (heading = 0) =>
     iconSize: [32, 32],
     iconAnchor: [16, 16],
   });
+
+// Iconos dinámicos para los POIs en el Mapa
+const createPoiMarkerIcon = (categoria) => {
+  let emoji = '📍';
+  let colorBg = 'bg-stone-800';
+
+  if (categoria === 'agua') { emoji = '💧'; colorBg = 'bg-cyan-600'; }
+  else if (categoria === 'salud') { emoji = '💊'; colorBg = 'bg-rose-600'; }
+  else if (categoria === 'comida') { emoji = '🛒'; colorBg = 'bg-amber-600'; }
+  else if (categoria === 'restauracion') { emoji = '🍽️'; colorBg = 'bg-orange-600'; }
+  else if (categoria === 'alojamiento') { emoji = '🛏️'; colorBg = 'bg-emerald-700'; }
+
+  return L.divIcon({
+    className: 'custom-poi-marker',
+    html: `
+      <div class="w-7 h-7 ${colorBg} border-2 border-white rounded-full shadow-md flex items-center justify-center text-white text-xs font-bold">
+        ${emoji}
+      </div>
+    `,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
+  });
+};
 
 function getDistanceMeters(lat1, lon1, lat2, lon2) {
   const R = 6371000;
@@ -157,7 +182,7 @@ export default function MapView() {
         </div>
       </div>
 
-      {/* 2. Botón Activar Brújula (Para permisos explícitos en iOS Safari) */}
+      {/* 2. Botón Activar Brújula */}
       {!compass.permissionGranted && (
         <button
           onClick={compass.requestPermission}
@@ -179,7 +204,7 @@ export default function MapView() {
         </button>
       )}
 
-      {/* 4. Mapa Leaflet */}
+      {/* 4. Mapa Leaflet con POIs */}
       <MapContainer center={activeCoords} zoom={mapZoom} className="w-full h-full z-0" zoomControl={false}>
         <TileLayer
           attribution='&copy; OpenStreetMap'
@@ -193,7 +218,24 @@ export default function MapView() {
         <MapController position={activeCoords} isTracking={isTracking} zoom={mapZoom} />
         <MapEventListener onDrag={handleMapDrag} />
 
-        {/* Marcador con Rumbo Suave y Filtro Híbrido */}
+        {/* Marcadores de Servicios Verificados */}
+        {poisEtapa4.map((poi) => (
+          <Marker
+            key={poi.id}
+            position={poi.coordenadas}
+            icon={createPoiMarkerIcon(poi.categoria)}
+          >
+            <Popup>
+              <div className="text-xs font-sans space-y-1">
+                <p className="font-black text-stone-900">{poi.nombre}</p>
+                <p className="text-stone-500 font-medium">{poi.descripcion}</p>
+                <p className="text-emerald-800 font-bold font-mono">km {poi.kmRuta.toFixed(1)}</p>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+
+        {/* Marcador del Peregrino */}
         <Marker position={activeCoords} icon={createPilgrimIcon(compass.heading)}>
           <Popup>
             <div className="text-xs font-sans">

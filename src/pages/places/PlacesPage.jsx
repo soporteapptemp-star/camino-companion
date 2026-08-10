@@ -1,29 +1,34 @@
 import React, { useState } from 'react';
 import PoiCard from '../../components/pois/PoiCard';
-import poisBruma from '../../data/pois/bruma.json';
-import { Bed, Utensils, HeartPulse, Search } from 'lucide-react';
+import poisEtapa4 from '../../data/pois/etapa4.pois.json';
+import { Bed, Utensils, HeartPulse, Droplet, ShoppingBag, Layers } from 'lucide-react';
 
 export default function PlacesPage() {
   const [filter, setFilter] = useState('todos');
 
   const categories = [
-    { id: 'todos', label: 'Todos', icon: null },
-    { id: 'dormir', label: 'Dormir', icon: Bed },
-    { id: 'comer', label: 'Comer', icon: Utensils },
+    { id: 'todos', label: 'Todos', icon: Layers },
+    { id: 'alojamiento', label: 'Dormir', icon: Bed },
+    { id: 'agua', label: 'Agua', icon: Droplet },
+    { id: 'restauracion', label: 'Comer', icon: Utensils },
+    { id: 'comida', label: 'Supermercado', icon: ShoppingBag },
     { id: 'salud', label: 'Salud', icon: HeartPulse },
   ];
 
+  const filteredPois = filter === 'todos'
+    ? poisEtapa4
+    : poisEtapa4.filter((poi) => poi.categoria === filter);
+
   return (
     <div className="space-y-4">
-      {/* Título de la sección */}
       <div>
-        <h2 className="text-2xl font-black text-stone-900">Alojamiento y Servicios</h2>
+        <h2 className="text-2xl font-black text-stone-900">Servicios en Ruta</h2>
         <p className="text-xs text-stone-500 font-medium">
-          Albergues, hostales y puntos clave al finalizar la etapa
+          Puntos clave verificados de Betanzos a Hospital de Bruma (24.1 km)
         </p>
       </div>
 
-      {/* Filtros rápidos por categoría */}
+      {/* Filtros por Categoría */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
         {categories.map((cat) => {
           const Icon = cat.icon;
@@ -45,11 +50,15 @@ export default function PlacesPage() {
         })}
       </div>
 
-      {/* Lista de Tarjetas POI */}
+      {/* Lista de Puntos de Interés */}
       <div className="space-y-3">
-        {poisBruma.map((poi) => (
-          <PoiCard key={poi.id} poi={poi} />
-        ))}
+        {filteredPois.length > 0 ? (
+          filteredPois.map((poi) => <PoiCard key={poi.id} poi={poi} />)
+        ) : (
+          <div className="p-8 text-center bg-white rounded-3xl border border-stone-200">
+            <p className="text-xs text-stone-500 font-bold">No hay servicios en esta categoría para el tramo actual.</p>
+          </div>
+        )}
       </div>
     </div>
   );
