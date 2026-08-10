@@ -1,5 +1,6 @@
 import React from 'react';
-import { Compass, PhoneCall, ShieldAlert, Moon, Bell } from 'lucide-react';
+import { Compass, PhoneCall, ShieldAlert } from 'lucide-react';
+import etapa4Data from '../../data/routes/camino-ingles/etapa4.json';
 
 export default function SettingsPage() {
   return (
@@ -11,7 +12,7 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      {/* Opción: Selección de Ruta */}
+      {/* Opción: Selección de Ruta Unificada */}
       <div className="bg-white p-4 rounded-3xl border border-stone-200 shadow-sm space-y-3">
         <div className="flex items-center gap-3">
           <div className="p-2.5 bg-emerald-100 text-emerald-800 rounded-2xl">
@@ -19,7 +20,9 @@ export default function SettingsPage() {
           </div>
           <div>
             <h3 className="text-sm font-bold text-stone-900">Ruta Seleccionada</h3>
-            <p className="text-xs text-stone-500">Camino Inglés (Ferrol → Santiago)</p>
+            <p className="text-xs text-stone-500">
+              {etapa4Data.camino} · Etapa {etapa4Data.etapa} ({etapa4Data.origen} → {etapa4Data.destino})
+            </p>
           </div>
         </div>
       </div>
