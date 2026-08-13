@@ -1,4 +1,3 @@
-// src/hooks/useGeolocation.js
 import { useState, useEffect, useRef } from 'react';
 import { KalmanFilter } from '../services/gps/kalman';
 
@@ -27,11 +26,14 @@ export function useGeolocation(options = {}) {
     speed: null,
     lastFixTime: null,
     error: null,
-    gpsStatus: 'SEARCHING', // 'EXCELLENT' (<=10m), 'GOOD' (<=25m), 'LOW' (>25m), 'SEARCHING' (null)
+    gpsStatus: 'SEARCHING',
   });
 
   const kalmanRef = useRef(new KalmanFilter());
   const lastCoordsRef = useRef(null);
+  
+  // Ref para congelar las opciones y evitar que watchPosition se reinicie en bucle
+  const optionsRef = useRef(options);
 
   useEffect(() => {
     if (!('geolocation' in navigator)) {
@@ -43,62 +45,65 @@ export function useGeolocation(options = {}) {
       enableHighAccuracy: true,
       timeout: 15000,
       maximumAge: 1000,
-      ...options,
+      ...optionsRef.current,
     };
 
-    const handleSuccess = (position) => {
-      const { latitude, longitude, accuracy, heading, speed } = position.coords;
-      const roundedAcc = Math.round(accuracy);
+    // Remplaza el fragmento dentro de handleSuccess en useGeolocation.js:
 
-      // Clasificación estricta de la calidad GPS para el Copiloto
-      let status = 'LOW';
-      if (roundedAcc <= 10) status = 'EXCELLENT';
-      else if (roundedAcc <= 25) status = 'GOOD';
+const handleSuccess = (position) => {
+  const { latitude, longitude, accuracy, heading, speed } = position.coords;
+  const roundedAcc = accuracy ? Math.round(accuracy) : 999;
 
-      // 1. Filtrar con el Kalman Filter
-      const filtered = kalmanRef.current.filter(latitude, longitude, accuracy);
+  // Umbrales realistas para campo y zonas urbanas/interiores
+  let status = 'WEAK';
+  if (roundedAcc <= 12) status = 'EXCELLENT';
+  else if (roundedAcc <= 30) status = 'GOOD';
+  else if (roundedAcc <= 80) status = 'MODERATE';
 
-      // 2. Cálculo sintético de rumbo (Heading)
-      let calculatedHeading = heading;
-      if (
-        (calculatedHeading === null || calculatedHeading === undefined || calculatedHeading === 0) &&
-        lastCoordsRef.current
-      ) {
-        const distMovedLat = Math.abs(filtered.lat - lastCoordsRef.current.lat);
-        const distMovedLng = Math.abs(filtered.lng - lastCoordsRef.current.lng);
+  // 1. Filtrar con Kalman
+  const filtered = kalmanRef.current.filter(latitude, longitude, roundedAcc);
 
-        if (distMovedLat > 0.00003 || distMovedLng > 0.00003) {
-          calculatedHeading = calculateBearing(
-            lastCoordsRef.current.lat,
-            lastCoordsRef.current.lng,
-            filtered.lat,
-            filtered.lng
-          );
-        } else {
-          calculatedHeading = lastCoordsRef.current.heading || 0;
-        }
-      }
+  // 2. Cálculo sintético de rumbo
+  let calculatedHeading = heading;
+  if (
+    (calculatedHeading === null || calculatedHeading === undefined || calculatedHeading === 0) &&
+    lastCoordsRef.current
+  ) {
+    const distMovedLat = Math.abs(filtered.lat - lastCoordsRef.current.lat);
+    const distMovedLng = Math.abs(filtered.lng - lastCoordsRef.current.lng);
 
-      lastCoordsRef.current = {
-        lat: filtered.lat,
-        lng: filtered.lng,
-        heading: calculatedHeading,
-      };
+    if (distMovedLat > 0.00003 || distMovedLng > 0.00003) {
+      calculatedHeading = calculateBearing(
+        lastCoordsRef.current.lat,
+        lastCoordsRef.current.lng,
+        filtered.lat,
+        filtered.lng
+      );
+    } else {
+      calculatedHeading = lastCoordsRef.current.heading || 0;
+    }
+  }
 
-      // 3. Actualizar estado
-      setLocation({
-        latitude: filtered.lat,
-        longitude: filtered.lng,
-        rawLatitude: latitude,
-        rawLongitude: longitude,
-        accuracy: roundedAcc,
-        heading: calculatedHeading ? Math.round(calculatedHeading) : 0,
-        speed: speed ?? 0,
-        lastFixTime: new Date(position.timestamp),
-        error: null,
-        gpsStatus: status,
-      });
-    };
+  lastCoordsRef.current = {
+    lat: filtered.lat,
+    lng: filtered.lng,
+    heading: calculatedHeading,
+  };
+
+  // 3. Actualizar estado
+  setLocation({
+    latitude: filtered.lat,
+    longitude: filtered.lng,
+    rawLatitude: latitude,
+    rawLongitude: longitude,
+    accuracy: roundedAcc,
+    heading: calculatedHeading ? Math.round(calculatedHeading) : 0,
+    speed: speed && !isNaN(speed) ? speed : 0,
+    lastFixTime: new Date(position.timestamp),
+    error: null,
+    gpsStatus: status, // Devuelve EXCELLENT, GOOD, MODERATE o WEAK
+  });
+};
 
     const handleError = (error) => {
       setLocation((prev) => ({ ...prev, error: error.message, gpsStatus: 'SEARCHING' }));

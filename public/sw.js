@@ -1,4 +1,4 @@
-const CACHE_NAME = 'camino-companion-v6';
+const CACHE_NAME = 'camino-companion-v7';
 const TILE_CACHE = 'camino-tiles-v1';
 
 const ASSETS_TO_CACHE = [
@@ -8,17 +8,15 @@ const ASSETS_TO_CACHE = [
   '/favicon.svg'
 ];
 
-// Instalación del Service Worker
+// 1. Instalación y Precarga
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
   );
   self.skipWaiting();
 });
 
-// Activación y limpieza de cachés antiguas
+// 2. Activación y Purga de Cachés Antiguas
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
@@ -34,11 +32,30 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Intercepción de Peticiones
+// Helper: Fetch con Timeout para evitar bloqueos en cobertura 2G/degradada
+const fetchWithTimeout = (request, timeoutMs = 2000) => {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('Network Timeout')), timeoutMs);
+    fetch(request)
+      .then((response) => {
+        clearTimeout(timer);
+        resolve(response);
+      })
+      .catch((err) => {
+        clearTimeout(timer);
+        reject(err);
+      });
+  });
+};
+
+// 3. Intercepción Inteligente de Red
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // 1. Tiles del mapa: Cache First
+  // Ignorar peticiones de extensiones o protocolos no soportados por caché
+  if (!url.protocol.startsWith('http')) return;
+
+  // A. Tiles del mapa: Cache First con fallback
   if (url.host.includes('tile.openstreetmap.org')) {
     event.respondWith(
       caches.open(TILE_CACHE).then(async (cache) => {
@@ -52,27 +69,47 @@ self.addEventListener('fetch', (event) => {
           }
           return networkResponse;
         } catch (error) {
-          return cachedResponse;
+          return cachedResponse || new Response('', { status: 404 });
         }
       })
     );
     return;
   }
 
-  // 2. App y JS/CSS: Network First (evita la pantalla en blanco tras despliegues)
+  // B. Navegación e Inserción de Código (JS, CSS, HTML): Stale-While-Revalidate / Network-First Rápido
   event.respondWith(
-    fetch(event.request)
-      .then((networkResponse) => {
-        if (networkResponse.status === 200) {
-          const responseClone = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
-        }
-        return networkResponse;
-      })
-      .catch(() => {
-        return caches.match(event.request).then((cachedResponse) => {
-          return cachedResponse || caches.match('/index.html');
+    caches.open(CACHE_NAME).then(async (cache) => {
+      const cachedResponse = await cache.match(event.request);
+
+      // Si tenemos caché y es una petición de navegación (página), devolvemos caché si la red tarda > 1.5s
+      try {
+        const networkPromise = fetchWithTimeout(event.request, 1500).then((networkResponse) => {
+          if (networkResponse.status === 200) {
+            cache.put(event.request, networkResponse.clone());
+          }
+          return networkResponse;
         });
-      })
+
+        // Si hay respuesta cacheada, intentamos red, pero caemos a caché si falla o expira el tiempo
+        if (cachedResponse) {
+          return networkPromise.catch(() => cachedResponse);
+        }
+
+        return await networkPromise;
+      } catch (error) {
+        if (cachedResponse) return cachedResponse;
+
+        // Fallback final a index.html para Single Page App (SPA)
+        if (event.request.mode === 'navigate') {
+          const fallback = await cache.match('/index.html');
+          if (fallback) return fallback;
+        }
+
+        return new Response('Sin conexión offline disponible', {
+          status: 503,
+          headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+        });
+      }
+    })
   );
 });

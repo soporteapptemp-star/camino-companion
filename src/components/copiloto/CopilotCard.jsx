@@ -1,15 +1,49 @@
-import React, { useState } from 'react';
-import { Navigation, Volume2, Utensils, MessageSquare, ArrowLeft } from 'lucide-react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { Navigation, Volume2, VolumeX, Utensils, MessageSquare, ArrowLeft } from 'lucide-react';
 import PeregrinoAiModal from '../ai/PeregrinoAiModal';
 import { useGeolocation } from '../../hooks/useGeolocation';
 import etapa4Data from '../../data/routes/camino-ingles/etapa4.json';
 
 export default function CopilotCard() {
   const [isAiOpen, setIsAiOpen] = useState(false);
-  const { speed, accuracy, loading, error } = useGeolocation();
+  const [isMuted, setIsMuted] = useState(false);
+  const lastSpokenRef = useRef('');
+  
+  // Hook sincronizado
+  const location = useGeolocation();
 
-  const nextService = etapa4Data.proximoServicio;
-  const nextIndication = etapa4Data.siguienteIndicacion;
+  const nextService = etapa4Data?.proximoServicio;
+  const nextIndication = etapa4Data?.siguienteIndicacion;
+
+  // Cálculo seguro de velocidad en km/h
+  const speedKmH = useMemo(() => {
+    const rawSpeed = location.speed || 0;
+    const calculated = rawSpeed * 3.6;
+    return isNaN(calculated) ? '0.0' : calculated.toFixed(1);
+  }, [location.speed]);
+
+  // Motor TTS (Text To Speech) Nativo para uso en bolsillo
+  const speakAnnouncement = (text) => {
+    if (isMuted || !('speechSynthesis' in window) || lastSpokenRef.current === text) return;
+
+    window.speechSynthesis.cancel(); // Detener locuciones anteriores
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'es-ES';
+    utterance.rate = 0.95; // Velocidad pausada para caminata
+    window.speechSynthesis.speak(utterance);
+    lastSpokenRef.current = text;
+  };
+
+  // Locución automática cuando cambia la indicación
+  useEffect(() => {
+    if (nextIndication && nextIndication.texto) {
+      speakAnnouncement(`En ${nextIndication.distanciaM} metros, ${nextIndication.texto}`);
+    }
+  }, [nextIndication?.texto, isMuted]);
+
+  // Estado visual del GPS
+  const isSearching = location.gpsStatus === 'SEARCHING' || location.accuracy === null;
+  const hasError = !!location.error;
 
   return (
     <div className="space-y-4">
@@ -37,21 +71,30 @@ export default function CopilotCard() {
       <div className="bg-stone-900 text-white rounded-3xl p-5 shadow-md border border-stone-800 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className={`w-2.5 h-2.5 rounded-full ${loading ? 'bg-amber-400 animate-pulse' : 'bg-emerald-500 animate-ping'}`} />
+            {/* Animación optimizada para no drenar batería */}
+            <div className={`w-2.5 h-2.5 rounded-full ${isSearching ? 'bg-amber-400 animate-pulse' : 'bg-emerald-500'}`} />
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Copiloto Inteligente</span>
           </div>
           <div className="flex items-center gap-2">
-            <button className="p-2 bg-stone-800 rounded-full text-stone-300 hover:text-white">
-              <Volume2 size={16} />
+            <button 
+              onClick={() => {
+                const nextState = !isMuted;
+                setIsMuted(nextState);
+                if (nextState) window.speechSynthesis?.cancel();
+              }}
+              className="p-2 bg-stone-800 rounded-full text-stone-300 hover:text-white transition-colors"
+              title={isMuted ? "Activar Voz" : "Silenciar Voz"}
+            >
+              {isMuted ? <VolumeX size={16} className="text-rose-400" /> : <Volume2 size={16} />}
             </button>
             <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full border ${
-              loading 
+              isSearching 
                 ? 'bg-stone-800 text-amber-400 border-stone-700' 
-                : error 
+                : hasError 
                   ? 'bg-red-950 text-red-400 border-red-800'
                   : 'bg-emerald-950 text-emerald-400 border-emerald-800'
             }`}>
-              {loading ? 'Buscando GPS...' : error ? 'Sin acceso GPS' : `GPS Precisión: ±${accuracy || '--'}m`}
+              {isSearching ? 'Buscando GPS...' : hasError ? 'Sin acceso GPS' : `GPS Precisión: ±${location.accuracy}m`}
             </span>
           </div>
         </div>
@@ -59,13 +102,13 @@ export default function CopilotCard() {
         {/* Métricas Reales */}
         <div className="grid grid-cols-3 gap-2 pt-1">
           <div className="bg-stone-800/80 p-3 rounded-2xl border border-stone-700/50 text-center">
-            <span className="text-[10px] uppercase font-bold text-stone-400 block">Ritmo</span>
+            <span className="text-[10px] uppercase font-bold text-stone-400 block">Velocidad</span>
             <span className="text-base font-black text-white">
-              {speed ? (speed * 3.6).toFixed(1) : '0.0'} <span className="text-[10px] font-normal text-stone-400">km/h</span>
+              {speedKmH} <span className="text-[10px] font-normal text-stone-400">km/h</span>
             </span>
           </div>
           <div className="bg-stone-800/80 p-3 rounded-2xl border border-stone-700/50 text-center">
-            <span className="text-[10px] uppercase font-bold text-stone-400 block">Falta</span>
+            <span className="text-[10px] uppercase font-bold text-stone-400 block">Total Etapa</span>
             <span className="text-base font-black text-white">{etapa4Data.distanciaTotalKm} <span className="text-[10px] font-normal text-stone-400">km</span></span>
           </div>
           <div className="bg-stone-800/80 p-3 rounded-2xl border border-stone-700/50 text-center">

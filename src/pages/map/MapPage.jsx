@@ -1,6 +1,5 @@
 import React from 'react';
 import MapView from '../../components/map/MapView';
-import { Navigation, Compass } from 'lucide-react';
 
 export default function MapPage() {
   return (
@@ -13,9 +12,6 @@ export default function MapPage() {
             Etapa 4: Betanzos → Hospital de Bruma
           </p>
         </div>
-        <button className="p-2.5 bg-emerald-900 text-emerald-400 rounded-full shadow-sm hover:bg-emerald-950">
-          <Compass size={20} />
-        </button>
       </div>
 
       {/* Mapa Leaflet */}

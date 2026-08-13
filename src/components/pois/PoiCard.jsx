@@ -1,7 +1,11 @@
 import React from 'react';
-import { Star, MapPin, Phone, ShieldCheck, Droplet, HeartPulse, ShoppingBag, Utensils, Bed, Compass } from 'lucide-react';
+import { MapPin, Phone, ShieldCheck, Droplet, HeartPulse, ShoppingBag, Utensils, Bed, Compass, Heart } from 'lucide-react';
+import { useFavorites } from '../../hooks/useFavorites';
 
 export default function PoiCard({ poi }) {
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const favorite = isFavorite(poi.id);
+
   const getCategoryBadge = (categoria) => {
     switch (categoria) {
       case 'agua':
@@ -24,18 +28,32 @@ export default function PoiCard({ poi }) {
 
   return (
     <div className="bg-white rounded-3xl p-5 border border-stone-200/80 shadow-sm space-y-3 relative">
-      {/* Header con Categoría y Verificación */}
+      {/* Header con Categoría, Verificación y Favorito */}
       <div className="flex items-center justify-between gap-2">
-        <span className={`text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full ${badge.bg}`}>
-          {badge.label}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className={`text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full ${badge.bg}`}>
+            {badge.label}
+          </span>
 
-        {isVerified && (
-          <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/60">
-            <ShieldCheck size={12} />
-            <span>Verificado {poi.verificacion.fecha}</span>
-          </div>
-        )}
+          {isVerified && (
+            <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/60">
+              <ShieldCheck size={12} />
+              <span>Verificado {poi.verificacion.fecha}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Botón Guardar en Favoritos Offline */}
+        <button
+          onClick={() => toggleFavorite(poi.id)}
+          className="p-1.5 rounded-full hover:bg-stone-100 transition-colors"
+          title={favorite ? "Quitar de Favoritos" : "Guardar en Favoritos"}
+        >
+          <Heart 
+            size={18} 
+            className={favorite ? "text-rose-500 fill-rose-500" : "text-stone-400"} 
+          />
+        </button>
       </div>
 
       {/* Nombre y Detalles */}

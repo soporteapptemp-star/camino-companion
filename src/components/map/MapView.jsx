@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -8,21 +8,22 @@ import etapa4Data from '../../data/routes/camino-ingles/etapa4.json';
 import poisEtapa4 from '../../data/pois/etapa4.pois.json';
 import { Navigation, AlertTriangle, CheckCircle2, Compass } from 'lucide-react';
 
-// Icono del peregrino
-const createPilgrimIcon = (heading = 0) =>
-  L.divIcon({
-    className: 'custom-pilgrim-marker',
-    html: `
-      <div style="transform: rotate(${heading}deg); transition: transform 0.1s linear;" class="w-8 h-8 bg-emerald-600 border-2 border-white rounded-full shadow-lg flex items-center justify-center text-white text-xs font-bold">
-        ⬆️
-      </div>
-    `,
-    iconSize: [32, 32],
-    iconAnchor: [16, 16],
-  });
+// Marker base del peregrino estático
+const basePilgrimIcon = L.divIcon({
+  className: 'custom-pilgrim-marker',
+  html: `
+    <div id="pilgrim-arrow" style="transition: transform 0.3s ease-out;" class="w-8 h-8 bg-emerald-600 border-2 border-white rounded-full shadow-lg flex items-center justify-center text-white text-xs font-bold">
+      ⬆️
+    </div>
+  `,
+  iconSize: [32, 32],
+  iconAnchor: [16, 16],
+});
 
-// Iconos dinámicos para los POIs en el Mapa
-const createPoiMarkerIcon = (categoria) => {
+const poiIconCache = {};
+const getPoiMarkerIcon = (categoria) => {
+  if (poiIconCache[categoria]) return poiIconCache[categoria];
+
   let emoji = '📍';
   let colorBg = 'bg-stone-800';
 
@@ -32,7 +33,7 @@ const createPoiMarkerIcon = (categoria) => {
   else if (categoria === 'restauracion') { emoji = '🍽️'; colorBg = 'bg-orange-600'; }
   else if (categoria === 'alojamiento') { emoji = '🛏️'; colorBg = 'bg-emerald-700'; }
 
-  return L.divIcon({
+  const icon = L.divIcon({
     className: 'custom-poi-marker',
     html: `
       <div class="w-7 h-7 ${colorBg} border-2 border-white rounded-full shadow-md flex items-center justify-center text-white text-xs font-bold">
@@ -42,6 +43,9 @@ const createPoiMarkerIcon = (categoria) => {
     iconSize: [28, 28],
     iconAnchor: [14, 14],
   });
+
+  poiIconCache[categoria] = icon;
+  return icon;
 };
 
 function getDistanceMeters(lat1, lon1, lat2, lon2) {
@@ -100,9 +104,7 @@ function MapController({ position, isTracking, zoom }) {
 
 function MapEventListener({ onDrag }) {
   useMapEvents({
-    dragstart: () => {
-      onDrag();
-    },
+    dragstart: onDrag,
   });
   return null;
 }
@@ -114,37 +116,71 @@ export default function MapView() {
   const [isTracking, setIsTracking] = useState(true);
   const [mapZoom, setMapZoom] = useState(16);
 
-  const routePath = etapa4Data?.coordenadas || [];
-  const defaultCenter = routePath.length > 0 ? routePath[0] : [43.281549, -8.211772];
+  const routePath = useMemo(() => etapa4Data?.coordenadas || [], []);
+  const defaultCenter = useMemo(() => (routePath.length > 0 ? routePath[0] : [43.281549, -8.211772]), [routePath]);
 
-  const snapResult = location.latitude && location.longitude
-    ? getSnappedPosition(location.latitude, location.longitude, routePath)
-    : { snappedLat: null, snappedLng: null, distanceMeters: 0 };
+  // Rotación CSS fluida sin re-crear instancias de Leaflet Icon
+  useEffect(() => {
+    const arrowEl = document.getElementById('pilgrim-arrow');
+    if (arrowEl) {
+      arrowEl.style.transform = `rotate(${compass.heading}deg)`;
+    }
+  }, [compass.heading]);
 
-  const activeCoords = snapResult.snappedLat && snapResult.snappedLng
-    ? [snapResult.snappedLat, snapResult.snappedLng]
-    : defaultCenter;
+  // Snap to route memorizado
+  const snapResult = useMemo(() => {
+    if (!location.latitude || !location.longitude) {
+      return { snappedLat: null, snappedLng: null, distanceMeters: 0 };
+    }
+    return getSnappedPosition(location.latitude, location.longitude, routePath);
+  }, [location.latitude, location.longitude, routePath]);
+
+  const activeCoords = useMemo(() => {
+    return snapResult.snappedLat && snapResult.snappedLng
+      ? [snapResult.snappedLat, snapResult.snappedLng]
+      : defaultCenter;
+  }, [snapResult.snappedLat, snapResult.snappedLng, defaultCenter]);
 
   const devDistance = snapResult.distanceMeters;
-  let devStatus = 'ON_ROUTE';
-  if (devDistance > 50) devStatus = 'OFF_ROUTE';
-  else if (devDistance > 25) devStatus = 'WARNING';
+  const devStatus = useMemo(() => {
+    if (devDistance > 50) return 'OFF_ROUTE';
+    if (devDistance > 25) return 'WARNING';
+    return 'ON_ROUTE';
+  }, [devDistance]);
 
   useEffect(() => {
-    if (location.speed !== null) {
-      const speedKmH = location.speed * 3.6;
-      if (speedKmH > 4.5) setMapZoom(17);
-      else if (speedKmH < 1.0) setMapZoom(15);
-    }
+    const currentSpeed = location.speed || 0;
+    const speedKmH = currentSpeed * 3.6;
+    if (speedKmH > 4.5) setMapZoom(17);
+    else if (speedKmH < 1.0) setMapZoom(15);
   }, [location.speed]);
 
-  const handleMapDrag = () => {
-    if (isTracking) setIsTracking(false);
-  };
+  const handleMapDrag = useCallback(() => {
+    setIsTracking(false);
+  }, []);
 
-  const handleRecenter = () => {
+  const handleRecenter = useCallback(() => {
     setIsTracking(true);
-  };
+  }, []);
+
+  // Memorización de POIs para evitar re-renders en el mapa
+  const renderedPois = useMemo(() => {
+    return poisEtapa4.map((poi) => (
+      <Marker
+        key={poi.id}
+        position={poi.coordenadas}
+        icon={getPoiMarkerIcon(poi.categoria)}
+      >
+        <Popup>
+          <div className="text-xs font-sans space-y-1">
+            <p className="font-black text-stone-900">{poi.nombre}</p>
+            <p className="text-stone-500 font-medium">{poi.descripcion}</p>
+            <p className="text-emerald-800 font-bold font-mono">km {poi.kmRuta.toFixed(1)}</p>
+          </div>
+        </Popup>
+      </Marker>
+    ));
+  }, []);
 
   return (
     <div className="relative w-full h-[72vh] rounded-3xl overflow-hidden border border-stone-200 shadow-sm bg-stone-100">
@@ -231,28 +267,14 @@ export default function MapView() {
         <MapEventListener onDrag={handleMapDrag} />
 
         {/* Marcadores de Servicios Verificados */}
-        {poisEtapa4.map((poi) => (
-          <Marker
-            key={poi.id}
-            position={poi.coordenadas}
-            icon={createPoiMarkerIcon(poi.categoria)}
-          >
-            <Popup>
-              <div className="text-xs font-sans space-y-1">
-                <p className="font-black text-stone-900">{poi.nombre}</p>
-                <p className="text-stone-500 font-medium">{poi.descripcion}</p>
-                <p className="text-emerald-800 font-bold font-mono">km {poi.kmRuta.toFixed(1)}</p>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+        {renderedPois}
 
-        {/* Marcador del Peregrino */}
-        <Marker position={activeCoords} icon={createPilgrimIcon(compass.heading)}>
+        {/* Marcador del Peregrino Estático con Rotación DOM directa */}
+        <Marker position={activeCoords} icon={basePilgrimIcon}>
           <Popup>
             <div className="text-xs font-sans">
               <p className="font-bold text-stone-900">Peregrino</p>
-              <p className="text-stone-500">Velocidad: {(location.speed * 3.6).toFixed(1)} km/h</p>
+              <p className="text-stone-500">Velocidad: {((location.speed || 0) * 3.6).toFixed(1)} km/h</p>
               <p className="text-stone-500">Rumbo Híbrido: {compass.heading}°</p>
             </div>
           </Popup>

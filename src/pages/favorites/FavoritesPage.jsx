@@ -1,11 +1,17 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Bookmark } from 'lucide-react';
 import poisEtapa4 from '../../data/pois/etapa4.pois.json';
 import PoiCard from '../../components/pois/PoiCard';
+import { useFavorites } from '../../hooks/useFavorites';
 
 export default function FavoritesPage() {
-  // Tomamos los albergues principales como favoritos por defecto para la demo de la etapa
-  const savedPois = poisEtapa4.filter((poi) => poi.categoria === 'alojamiento');
+  const { favorites } = useFavorites();
+
+  // Filtrado de POIs guardados reales combinados con los datos offline de la etapa
+  const savedPois = useMemo(() => {
+    if (!favorites || favorites.length === 0) return [];
+    return poisEtapa4.filter((poi) => favorites.includes(poi.id));
+  }, [favorites]);
 
   return (
     <div className="space-y-4">
