@@ -3,9 +3,9 @@ import CopilotCard from '../../components/copiloto/CopilotCard';
 import { useGeolocation } from '../../hooks/useGeolocation';
 import etapa4Data from '../../data/routes/camino-ingles/etapa4.json';
 
-// Función auxiliar Haversine para calcular distancia entre 2 coordenadas en metros
-function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
-  const R = 6371e3; // Radio de la Tierra en metros
+// Función Haversine para medir metros entre dos coordenadas GPS
+function getDistanceInMeters(lat1, lon1, lat2, lon2) {
+  const R = 6371e3;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
   const a =
@@ -14,38 +14,34 @@ function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
       Math.cos((lat2 * Math.PI) / 180) *
       Math.sin(dLon / 2) *
       Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
 export default function HomePage() {
   const location = useGeolocation();
 
-  // Calcular distancia mínima al trazado GPX en metros
+  // Calcular la distancia más cercana al trazado GPX
   const distanceToGpx = React.useMemo(() => {
-    if (!location.latitude || !location.longitude || !etapa4Data?.gpxPoints?.length) {
-      return 0;
-    }
+    if (!location?.latitude || !location?.longitude) return 0;
+
+    // Buscar puntos GPX en el JSON de la etapa
+    const points = etapa4Data?.gpxPoints || etapa4Data?.track || [];
+    if (!points.length) return 0;
 
     let minDistance = Infinity;
-    const userLat = location.latitude;
-    const userLng = location.longitude;
 
-    // Recorre los puntos GPX para encontrar el más cercano al peregrino
-    for (const point of etapa4Data.gpxPoints) {
-      const ptLat = Array.isArray(point) ? point[0] : point.lat;
-      const ptLng = Array.isArray(point) ? point[1] : point.lng;
+    for (const pt of points) {
+      const lat = Array.isArray(pt) ? pt[0] : (pt.lat || pt.latitude);
+      const lng = Array.isArray(pt) ? pt[1] : (pt.lng || pt.longitude);
 
-      if (ptLat && ptLng) {
-        const dist = getDistanceFromLatLonInMeters(userLat, userLng, ptLat, ptLng);
-        if (dist < minDistance) {
-          minDistance = dist;
-        }
+      if (lat && lng) {
+        const dist = getDistanceInMeters(location.latitude, location.longitude, lat, lng);
+        if (dist < minDistance) minDistance = dist;
       }
     }
 
     return minDistance === Infinity ? 0 : Math.round(minDistance);
-  }, [location.latitude, location.longitude]);
+  }, [location?.latitude, location?.longitude]);
 
   return (
     <div className="space-y-4">
