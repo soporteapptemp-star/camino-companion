@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import CopilotCard from '../../components/copiloto/CopilotCard';
 import { useGeolocation } from '../../hooks/useGeolocation';
 import etapa4Data from '../../data/routes/camino-ingles/etapa4.json';
 
-// Función Haversine para medir metros entre dos coordenadas GPS
-function getDistanceInMeters(lat1, lon1, lat2, lon2) {
-  const R = 6371e3;
+// Matemática idéntica a MapView para medir metros reales
+function getDistanceMeters(lat1, lon1, lat2, lon2) {
+  const R = 6371000;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
   const a =
@@ -14,34 +14,43 @@ function getDistanceInMeters(lat1, lon1, lat2, lon2) {
       Math.cos((lat2 * Math.PI) / 180) *
       Math.sin(dLon / 2) *
       Math.sin(dLon / 2);
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+// Snapping idéntico a MapView.jsx
+function calculateDistanceToRoute(userLat, userLng, routeCoords) {
+  if (!routeCoords || routeCoords.length < 2 || !userLat || !userLng) {
+    return 0;
+  }
+
+  let minDistance = Infinity;
+
+  for (let i = 0; i < routeCoords.length - 1; i++) {
+    const p1 = routeCoords[i];
+    const p2 = routeCoords[i + 1];
+
+    const distP1 = getDistanceMeters(userLat, userLng, p1[0], p1[1]);
+    const distP2 = getDistanceMeters(userLat, userLng, p2[0], p2[1]);
+    const distToSegment = Math.min(distP1, distP2);
+
+    if (distToSegment < minDistance) {
+      minDistance = distToSegment;
+    }
+  }
+
+  return minDistance === Infinity ? 0 : Math.round(minDistance);
 }
 
 export default function HomePage() {
   const location = useGeolocation();
+  const routePath = useMemo(() => etapa4Data?.coordenadas || [], []);
 
-  // Calcular la distancia más cercana al trazado GPX
-  const distanceToGpx = React.useMemo(() => {
-    if (!location?.latitude || !location?.longitude) return 0;
-
-    // Buscar puntos GPX en el JSON de la etapa
-    const points = etapa4Data?.gpxPoints || etapa4Data?.track || [];
-    if (!points.length) return 0;
-
-    let minDistance = Infinity;
-
-    for (const pt of points) {
-      const lat = Array.isArray(pt) ? pt[0] : (pt.lat || pt.latitude);
-      const lng = Array.isArray(pt) ? pt[1] : (pt.lng || pt.longitude);
-
-      if (lat && lng) {
-        const dist = getDistanceInMeters(location.latitude, location.longitude, lat, lng);
-        if (dist < minDistance) minDistance = dist;
-      }
-    }
-
-    return minDistance === Infinity ? 0 : Math.round(minDistance);
-  }, [location?.latitude, location?.longitude]);
+  // Calcula exactamente la misma distancia que el Mapa en tiempo real
+  const distanceToGpx = useMemo(() => {
+    if (!location.latitude || !location.longitude) return 0;
+    return calculateDistanceToRoute(location.latitude, location.longitude, routePath);
+  }, [location.latitude, location.longitude, routePath]);
 
   return (
     <div className="space-y-4">
