@@ -1,40 +1,38 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { Navigation, Volume2, VolumeX, Utensils, MessageSquare, ArrowLeft } from 'lucide-react';
+import { Navigation, Volume2, VolumeX, Utensils, MessageSquare, ArrowLeft, AlertTriangle } from 'lucide-react';
 import PeregrinoAiModal from '../ai/PeregrinoAiModal';
-import { useGeolocation } from '../../hooks/useGeolocation';
+import { useRouteStatus, ROUTE_STATES } from '../../hooks/useRouteStatus';
 import etapa4Data from '../../data/routes/camino-ingles/etapa4.json';
 
-export default function CopilotCard() {
+export default function CopilotCard({ distanceToGpx = 0 }) {
   const [isAiOpen, setIsAiOpen] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const lastSpokenRef = useRef('');
   
-  // Hook sincronizado
-  const location = useGeolocation();
+  // Hook central de Navegación con Histéresis
+  const { routeState, distanceToGpx: distance, accuracy, speed, gpsStatus, error } = useRouteStatus(distanceToGpx);
 
   const nextService = etapa4Data?.proximoServicio;
   const nextIndication = etapa4Data?.siguienteIndicacion;
 
   // Cálculo seguro de velocidad en km/h
   const speedKmH = useMemo(() => {
-    const rawSpeed = location.speed || 0;
+    const rawSpeed = speed || 0;
     const calculated = rawSpeed * 3.6;
     return isNaN(calculated) ? '0.0' : calculated.toFixed(1);
-  }, [location.speed]);
+  }, [speed]);
 
-  // Motor TTS (Text To Speech) Nativo para uso en bolsillo
+  // Locuciones de voz (TTS)
   const speakAnnouncement = (text) => {
     if (isMuted || !('speechSynthesis' in window) || lastSpokenRef.current === text) return;
-
-    window.speechSynthesis.cancel(); // Detener locuciones anteriores
+    window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'es-ES';
-    utterance.rate = 0.95; // Velocidad pausada para caminata
+    utterance.rate = 0.95;
     window.speechSynthesis.speak(utterance);
     lastSpokenRef.current = text;
   };
 
-  // Locución automática cuando cambia la indicación
   useEffect(() => {
     if (nextIndication && nextIndication.texto) {
       speakAnnouncement(`En ${nextIndication.distanciaM} metros, ${nextIndication.texto}`);
@@ -42,19 +40,43 @@ export default function CopilotCard() {
   }, [nextIndication?.texto, isMuted]);
 
   // Estado visual del GPS
-  const isSearching = location.gpsStatus === 'SEARCHING' || location.accuracy === null;
-  const hasError = !!location.error;
+  const isSearching = gpsStatus === 'SEARCHING' || accuracy === null;
+  const hasError = !!error;
+
+  // Estilos y badges dinámicos según el RouteState unificado
+  const statusConfig = {
+    [ROUTE_STATES.ON_ROUTE]: {
+      label: 'EN RUTA OFICIAL',
+      cardGradient: 'from-emerald-800 to-emerald-950 border-emerald-700/50',
+      badgeBg: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+      iconColor: 'text-emerald-300 fill-emerald-300'
+    },
+    [ROUTE_STATES.CHECK_ROUTE]: {
+      label: `COMPROBAR RUTA (${distance}m)`,
+      cardGradient: 'from-amber-900 to-amber-950 border-amber-700/50',
+      badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+      iconColor: 'text-amber-300 fill-amber-300'
+    },
+    [ROUTE_STATES.OFF_ROUTE]: {
+      label: `POSIBLE DESVÍO (${distance}m)`,
+      cardGradient: 'from-rose-900 to-rose-950 border-rose-700/50',
+      badgeBg: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
+      iconColor: 'text-rose-300 fill-rose-300'
+    }
+  };
+
+  const currentStatus = statusConfig[routeState] || statusConfig[ROUTE_STATES.ON_ROUTE];
 
   return (
     <div className="space-y-4">
       {/* TARJETA 1: Alerta / Estado de Navegación Sincronizado */}
-      <div className="bg-gradient-to-br from-emerald-800 to-emerald-950 text-white rounded-3xl p-5 shadow-lg relative overflow-hidden border border-emerald-700/50">
+      <div className={`bg-gradient-to-br ${currentStatus.cardGradient} text-white rounded-3xl p-5 shadow-lg relative overflow-hidden border transition-all duration-300`}>
         <div className="flex items-center justify-between mb-3">
           <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-            <Navigation size={22} className="text-emerald-300 fill-emerald-300 rotate-45" />
+            <Navigation size={22} className={`${currentStatus.iconColor} rotate-45`} />
           </div>
-          <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full uppercase tracking-wider font-extrabold border border-emerald-500/30">
-            En Ruta Oficial
+          <span className={`text-[10px] ${currentStatus.badgeBg} px-3 py-1 rounded-full uppercase tracking-wider font-extrabold border transition-all`}>
+            {currentStatus.label}
           </span>
         </div>
 
@@ -63,7 +85,9 @@ export default function CopilotCard() {
           {etapa4Data.origen} → {etapa4Data.destino}
         </h2>
         <p className="text-xs text-emerald-100/90 mt-1 font-medium">
-          Sigue las flechas amarillas hacia {etapa4Data.destino}
+          {routeState === ROUTE_STATES.OFF_ROUTE 
+            ? 'Te has alejado del trazado. Revisa la pantalla del mapa para reconectar.' 
+            : `Sigue las flechas amarillas hacia ${etapa4Data.destino}`}
         </p>
       </div>
 
@@ -71,7 +95,6 @@ export default function CopilotCard() {
       <div className="bg-stone-900 text-white rounded-3xl p-5 shadow-md border border-stone-800 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            {/* Animación optimizada para no drenar batería */}
             <div className={`w-2.5 h-2.5 rounded-full ${isSearching ? 'bg-amber-400 animate-pulse' : 'bg-emerald-500'}`} />
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Copiloto Inteligente</span>
           </div>
@@ -94,7 +117,7 @@ export default function CopilotCard() {
                   ? 'bg-red-950 text-red-400 border-red-800'
                   : 'bg-emerald-950 text-emerald-400 border-emerald-800'
             }`}>
-              {isSearching ? 'Buscando GPS...' : hasError ? 'Sin acceso GPS' : `GPS Precisión: ±${location.accuracy}m`}
+              {isSearching ? 'Buscando GPS...' : hasError ? 'Sin acceso GPS' : `GPS Precisión: ±${accuracy}m`}
             </span>
           </div>
         </div>
