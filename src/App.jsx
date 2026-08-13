@@ -7,6 +7,7 @@ import FavoritesPage from './pages/favorites/FavoritesPage';
 import SettingsPage from './pages/settings/SettingsPage';
 import { usePwaUpdate } from './hooks/usePwaUpdate';
 import { RefreshCw } from 'lucide-react';
+import OfflineManager from './components/offline/OfflineManager';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('inicio');

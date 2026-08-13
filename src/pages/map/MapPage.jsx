@@ -1,5 +1,6 @@
 import React from 'react';
 import MapView from '../../components/map/MapView';
+import OfflineManager from '../../components/offline/OfflineManager';
 
 export default function MapPage() {
   return (
@@ -13,6 +14,9 @@ export default function MapPage() {
           </p>
         </div>
       </div>
+
+      {/* Tarjeta Gestor Offline (Paso 4 + Paso 5) */}
+      <OfflineManager />
 
       {/* Mapa Leaflet */}
       <MapView />

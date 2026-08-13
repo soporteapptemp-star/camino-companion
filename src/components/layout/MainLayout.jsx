@@ -8,14 +8,19 @@ export default function MainLayout({ children, activeTab, setActiveTab }) {
   const geoProps = useGeolocation();
 
   return (
-    <div className="min-h-screen pb-24 bg-[#F8F6F0] selection:bg-emerald-200">
+    <div className="min-h-screen pb-32 bg-[#F8F6F0] selection:bg-emerald-200">
       <Header />
 
       <main className="max-w-md mx-auto px-4 mt-2">
-        {children}
+        {React.Children.map(children, (child) => {
+          if (React.isValidElement(child)) {
+            return React.cloneElement(child, { geoProps });
+          }
+          return child;
+        })}
       </main>
 
-      {/* Widget Flotante del Simulador GPS */}
+      {/* Control del Simulador flotante y ajustado */}
       <GpsSimControl simProps={geoProps} />
 
       <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />

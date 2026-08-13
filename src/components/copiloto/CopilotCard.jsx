@@ -1,26 +1,29 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { Navigation, Volume2, VolumeX, Utensils, MessageSquare, ArrowLeft, AlertTriangle } from 'lucide-react';
+import { Navigation, Volume2, VolumeX, Utensils, MessageSquare, ArrowLeft } from 'lucide-react';
 import PeregrinoAiModal from '../ai/PeregrinoAiModal';
 import { useRouteStatus, ROUTE_STATES } from '../../hooks/useRouteStatus';
 import etapa4Data from '../../data/routes/camino-ingles/etapa4.json';
 
-export default function CopilotCard({ distanceToGpx = 0 }) {
+export default function CopilotCard({ distanceToGpx = 0, speed: propSpeed }) {
   const [isAiOpen, setIsAiOpen] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const lastSpokenRef = useRef('');
   
   // Hook central de Navegación con Histéresis
-  const { routeState, distanceToGpx: distance, accuracy, speed, gpsStatus, error } = useRouteStatus(distanceToGpx);
+  const { routeState, distanceToGpx: distance, accuracy, speed: hookSpeed, gpsStatus, error } = useRouteStatus(distanceToGpx);
 
   const nextService = etapa4Data?.proximoServicio;
   const nextIndication = etapa4Data?.siguienteIndicacion;
 
-  // Cálculo seguro de velocidad en km/h
-  const speedKmH = useMemo(() => {
-    const rawSpeed = speed || 0;
+  // Cálculo seguro de velocidad: prioriza la prop procesada (km/h) si viene definida, sino usa la del hook
+  const displaySpeed = useMemo(() => {
+    if (propSpeed !== undefined && propSpeed !== null) {
+      return propSpeed;
+    }
+    const rawSpeed = hookSpeed || 0;
     const calculated = rawSpeed * 3.6;
     return isNaN(calculated) ? '0.0' : calculated.toFixed(1);
-  }, [speed]);
+  }, [propSpeed, hookSpeed]);
 
   // Locuciones de voz (TTS)
   const speakAnnouncement = (text) => {
@@ -68,7 +71,7 @@ export default function CopilotCard({ distanceToGpx = 0 }) {
   const currentStatus = statusConfig[routeState] || statusConfig[ROUTE_STATES.ON_ROUTE];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 font-sans">
       {/* TARJETA 1: Alerta / Estado de Navegación Sincronizado */}
       <div className={`bg-gradient-to-br ${currentStatus.cardGradient} text-white rounded-3xl p-5 shadow-lg relative overflow-hidden border transition-all duration-300`}>
         <div className="flex items-center justify-between mb-3">
@@ -117,7 +120,7 @@ export default function CopilotCard({ distanceToGpx = 0 }) {
                   ? 'bg-red-950 text-red-400 border-red-800'
                   : 'bg-emerald-950 text-emerald-400 border-emerald-800'
             }`}>
-              {isSearching ? 'Buscando GPS...' : hasError ? 'Sin acceso GPS' : `GPS Precisión: ±${accuracy}m`}
+              {isSearching ? 'Buscando GPS...' : hasError ? 'Sin acceso GPS' : `GPS Precisión: ±${accuracy ?? 5}m`}
             </span>
           </div>
         </div>
@@ -127,7 +130,7 @@ export default function CopilotCard({ distanceToGpx = 0 }) {
           <div className="bg-stone-800/80 p-3 rounded-2xl border border-stone-700/50 text-center">
             <span className="text-[10px] uppercase font-bold text-stone-400 block">Velocidad</span>
             <span className="text-base font-black text-white">
-              {speedKmH} <span className="text-[10px] font-normal text-stone-400">km/h</span>
+              {displaySpeed} <span className="text-[10px] font-normal text-stone-400">km/h</span>
             </span>
           </div>
           <div className="bg-stone-800/80 p-3 rounded-2xl border border-stone-700/50 text-center">

@@ -1,9 +1,8 @@
 import React, { useMemo } from 'react';
 import CopilotCard from '../../components/copiloto/CopilotCard';
-import { useGeolocation } from '../../hooks/useGeolocation';
+import { useGeolocation as useRealGeolocation } from '../../hooks/useGeolocation';
 import etapa4Data from '../../data/routes/camino-ingles/etapa4.json';
 
-// Matemática idéntica a MapView para medir metros reales
 function getDistanceMeters(lat1, lon1, lat2, lon2) {
   const R = 6371000;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -18,7 +17,6 @@ function getDistanceMeters(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
-// Snapping idéntico a MapView.jsx
 function calculateDistanceToRoute(userLat, userLng, routeCoords) {
   if (!routeCoords || routeCoords.length < 2 || !userLat || !userLng) {
     return 0;
@@ -42,19 +40,31 @@ function calculateDistanceToRoute(userLat, userLng, routeCoords) {
   return minDistance === Infinity ? 0 : Math.round(minDistance);
 }
 
-export default function HomePage() {
-  const location = useGeolocation();
+export default function HomePage({ geoProps }) {
+  const fallbackLocation = useRealGeolocation();
+  const location = geoProps || fallbackLocation;
+
   const routePath = useMemo(() => etapa4Data?.coordenadas || [], []);
 
-  // Calcula exactamente la misma distancia que el Mapa en tiempo real
   const distanceToGpx = useMemo(() => {
     if (!location.latitude || !location.longitude) return 0;
     return calculateDistanceToRoute(location.latitude, location.longitude, routePath);
   }, [location.latitude, location.longitude, routePath]);
 
+  // Convertimos m/s a km/h si viene del GPS real o la simulación
+  const currentSpeedKmH = useMemo(() => {
+    if (typeof location.speed === 'number') {
+      return (location.speed * 3.6).toFixed(1);
+    }
+    return '0.0';
+  }, [location.speed]);
+
   return (
     <div className="space-y-4">
-      <CopilotCard distanceToGpx={distanceToGpx} />
+      <CopilotCard 
+        distanceToGpx={distanceToGpx} 
+        speed={currentSpeedKmH} 
+      />
     </div>
   );
 }

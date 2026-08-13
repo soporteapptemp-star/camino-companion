@@ -1,6 +1,7 @@
-const CACHE_NAME = 'camino-companion-v7';
+const CACHE_NAME = 'camino-companion-v8';
 const TILE_CACHE = 'camino-tiles-v1';
 
+// App Shell básico obligatorio
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -11,7 +12,10 @@ const ASSETS_TO_CACHE = [
 // 1. Instalación y Precarga
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
+    caches.open(CACHE_NAME).then((cache) => {
+      console.log('[SW] Precachando App Shell base');
+      return cache.addAll(ASSETS_TO_CACHE);
+    })
   );
   self.skipWaiting();
 });
@@ -23,6 +27,7 @@ self.addEventListener('activate', (event) => {
       Promise.all(
         keys.map((key) => {
           if (key !== CACHE_NAME && key !== TILE_CACHE) {
+            console.log('[SW] Eliminando caché antigua:', key);
             return caches.delete(key);
           }
         })
@@ -76,12 +81,52 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // B. Navegación e Inserción de Código (JS, CSS, HTML): Stale-While-Revalidate / Network-First Rápido
+  // B. Assets estáticos compilados por Vite (/assets/*.js, *.css, *.json, imágen/svg)
+  // Estrategia: Cache First, Network Backup (Garantiza los JSONs y bundle JS en offline)
+  if (
+    url.pathname.startsWith('/assets/') ||
+    url.pathname.endsWith('.json') ||
+    url.pathname.endsWith('.js') ||
+    url.pathname.endsWith('.css') ||
+    url.pathname.endsWith('.svg') ||
+    url.pathname.endsWith('.webp')
+  ) {
+    event.respondWith(
+      caches.open(CACHE_NAME).then(async (cache) => {
+        const cachedResponse = await cache.match(event.request);
+        if (cachedResponse) {
+          // Actualización silenciosa en background si hay red
+          fetch(event.request)
+            .then((networkResponse) => {
+              if (networkResponse.status === 200) {
+                cache.put(event.request, networkResponse);
+              }
+            })
+            .catch(() => {/* Silenciar error si está offline */});
+
+          return cachedResponse;
+        }
+
+        // Si no está en caché, ir a la red y guardar
+        try {
+          const networkResponse = await fetch(event.request);
+          if (networkResponse.status === 200) {
+            cache.put(event.request, networkResponse.clone());
+          }
+          return networkResponse;
+        } catch (err) {
+          return new Response('Asset no disponible offline', { status: 404 });
+        }
+      })
+    );
+    return;
+  }
+
+  // C. Navegación principal (HTML SPA): Stale-While-Revalidate con Timeout rápido
   event.respondWith(
     caches.open(CACHE_NAME).then(async (cache) => {
       const cachedResponse = await cache.match(event.request);
 
-      // Si tenemos caché y es una petición de navegación (página), devolvemos caché si la red tarda > 1.5s
       try {
         const networkPromise = fetchWithTimeout(event.request, 1500).then((networkResponse) => {
           if (networkResponse.status === 200) {
@@ -90,7 +135,6 @@ self.addEventListener('fetch', (event) => {
           return networkResponse;
         });
 
-        // Si hay respuesta cacheada, intentamos red, pero caemos a caché si falla o expira el tiempo
         if (cachedResponse) {
           return networkPromise.catch(() => cachedResponse);
         }
