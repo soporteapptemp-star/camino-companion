@@ -1,7 +1,7 @@
 import React from 'react';
 import { AlertCircle, Thermometer, CloudRain, ChevronDown } from 'lucide-react';
 
-export default function Header({ currentStage = "Camino Inglés · Etapa 4", userName = "Rau" }) {
+export default function Header({ currentStage = "Camino Inglés · Etapa 4", userName = "Peregrino" }) {
   return (
     <header className="pt-4 px-4 pb-2 max-w-md mx-auto">
       {/* Alerta de Modo Offline si aplica */}
@@ -34,10 +34,10 @@ export default function Header({ currentStage = "Camino Inglés · Etapa 4", use
         </div>
       </div>
 
-      {/* Saludo */}
+      {/* Saludo Genérico */}
       <div className="mt-3">
         <h1 className="text-2xl font-black text-stone-900 tracking-tight flex items-center gap-2">
-          Buenos días, {userName} 👋
+          ¡Buen Camino, {userName}! 👋
         </h1>
       </div>
     </header>

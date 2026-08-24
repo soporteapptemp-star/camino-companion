@@ -20,8 +20,10 @@ export default function MainLayout({ children, activeTab, setActiveTab }) {
         })}
       </main>
 
-      {/* Control del Simulador flotante y ajustado */}
-      <GpsSimControl simProps={geoProps} />
+      {/* El simulador solo se muestra durante el desarrollo local */}
+      {process.env.NODE_ENV === 'development' && (
+        <GpsSimControl simProps={geoProps} />
+      )}
 
       <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
     </div>

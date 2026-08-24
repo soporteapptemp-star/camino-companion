@@ -37,11 +37,11 @@ export default function PeregrinoAiModal({ isOpen, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="bg-stone-900 text-white w-full max-w-md h-[85vh] sm:h-[600px] rounded-t-3xl sm:rounded-3xl flex flex-col overflow-hidden border border-stone-800 shadow-2xl animate-in slide-in-from-bottom duration-200">
+    <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div className="bg-stone-900 text-white w-full max-w-md h-[90vh] sm:h-[600px] rounded-t-3xl sm:rounded-3xl flex flex-col overflow-hidden border border-stone-800 shadow-2xl animate-in slide-in-from-bottom duration-200">
         
         {/* Header Modal */}
-        <div className="p-4 bg-stone-950/80 border-b border-stone-800 flex items-center justify-between">
+        <div className="p-4 bg-stone-950/90 border-b border-stone-800 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="p-2 bg-emerald-900/80 rounded-xl text-emerald-400">
               <Bot size={20} />
@@ -83,7 +83,7 @@ export default function PeregrinoAiModal({ isOpen, onClose }) {
         </div>
 
         {/* Quick Prompts */}
-        <div className="px-4 py-2 border-t border-stone-800/60 flex items-center gap-2 overflow-x-auto scrollbar-none">
+        <div className="px-4 py-2 border-t border-stone-800/60 flex items-center gap-2 overflow-x-auto scrollbar-none shrink-0">
           {quickPrompts.map((p, i) => (
             <button
               key={i}
@@ -95,8 +95,8 @@ export default function PeregrinoAiModal({ isOpen, onClose }) {
           ))}
         </div>
 
-        {/* Input */}
-        <div className="p-3 bg-stone-950/90 border-t border-stone-800 flex items-center gap-2">
+        {/* Input con margen para navegadores móviles */}
+        <div className="p-3 pb-8 sm:pb-3 bg-stone-950/95 border-t border-stone-800 flex items-center gap-2 shrink-0">
           <input
             type="text"
             value={input}
