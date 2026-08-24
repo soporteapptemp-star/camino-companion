@@ -158,7 +158,7 @@ export default function SettingsPage() {
       {/* Versión e información */}
       <div className="pt-2 text-center">
         <span className="text-[11px] font-mono text-stone-400">
-          Camino Companion v5.0 · PWA Ready
+          WayStep v5.0 · PWA Ready
         </span>
       </div>
     </div>

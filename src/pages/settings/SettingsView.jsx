@@ -121,7 +121,7 @@ export default function SettingsView() {
 
       {/* 4. Info de la App */}
       <div className="bg-stone-100 rounded-2xl p-4 border border-stone-200 text-center space-y-1">
-        <p className="text-xs font-bold text-stone-700">Camino Companion v1.0</p>
+        <p className="text-xs font-bold text-stone-700">WayStepv1.0</p>
         <p className="text-[10px] text-stone-400">Diseñado para peregrinos offline</p>
       </div>
     </div>

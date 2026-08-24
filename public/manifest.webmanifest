@@ -1,6 +1,6 @@
 {
-  "name": "Camino Companion",
-  "short_name": "Camino",
+  "name": "WayStep",
+  "short_name": "WayStep",
   "description": "Tu copiloto inteligente para el Camino de Santiago",
   "start_url": "/",
   "display": "standalone",
