@@ -5,6 +5,7 @@ import 'leaflet/dist/leaflet.css';
 import { useGeolocation } from '../../hooks/useGeolocation';
 import { useCompass } from '../../hooks/useCompass';
 import { useContextualCopilot } from '../../hooks/useContextualCopilot';
+import { useLanguage } from '../../context/LanguageContext';
 import ContextBanner from '../ui/ContextBanner';
 import etapa4Data from '../../data/routes/camino-ingles/etapa4.json';
 import poisEtapa4 from '../../data/pois/etapa4.pois.json';
@@ -113,22 +114,24 @@ function MapEventListener({ onDrag }) {
   return null;
 }
 
-const CATEGORIAS_POIS = [
-  { id: 'todos', nombre: 'Todos', emoji: '📍' },
-  { id: 'agua', nombre: 'Fuentes', emoji: '💧' },
-  { id: 'alojamiento', nombre: 'Albergues', emoji: '🛏️' },
-  { id: 'restauracion', nombre: 'Bares', emoji: '🍽️' },
-  { id: 'comida', nombre: 'Tiendas', emoji: '🛒' },
-  { id: 'salud', nombre: 'Salud', emoji: '💊' },
-];
-
 export default function MapView() {
+  const { t, lang } = useLanguage();
   const location = useGeolocation();
   const compass = useCompass(location.heading, location.speed);
 
   const [isTracking, setIsTracking] = useState(true);
   const [mapZoom, setMapZoom] = useState(16);
   const [selectedCategory, setSelectedCategory] = useState('todos');
+
+  // Categorías de POIs traducidas
+  const categoriasPois = useMemo(() => [
+    { id: 'todos', nombre: t('places.all', 'Todos'), emoji: '📍' },
+    { id: 'agua', nombre: t('places.water', 'Fuentes'), emoji: '💧' },
+    { id: 'alojamiento', nombre: t('places.sleep', 'Albergues'), emoji: '🛏️' },
+    { id: 'restauracion', nombre: t('places.eat', 'Bares'), emoji: '🍽️' },
+    { id: 'comida', nombre: t('places.market', 'Tiendas'), emoji: '🛒' },
+    { id: 'salud', nombre: t('places.health', 'Salud'), emoji: '💊' },
+  ], [t]);
 
   const routePath = useMemo(() => etapa4Data?.coordenadas || [], []);
   const defaultCenter = useMemo(() => (routePath.length > 0 ? routePath[0] : [43.281549, -8.211772]), [routePath]);
@@ -159,11 +162,10 @@ export default function MapView() {
   const contextualNotice = useContextualCopilot(
     activeCoords,
     poisEtapa4,
-    24.1, // Km totales de la etapa 4
-    0     // Km actuales recorridos
+    24.1, // Km totales
+    0     // Km recorridos
   );
 
-  // Distancia real de desvío
   const devDistance = snapResult.distanceMeters;
 
   // Estados de ruta
@@ -173,7 +175,7 @@ export default function MapView() {
     return 'ON_ROUTE';
   }, [devDistance]);
 
-  // Procesar alertas audibles y de vibración
+  // Alertas audibles
   useEffect(() => {
     if (location.latitude && location.longitude) {
       audioAlertService.processAlert(devStatus, devDistance);
@@ -260,7 +262,9 @@ export default function MapView() {
               <div className="flex justify-between items-center text-[9px] text-stone-400 font-mono pt-1 border-t border-stone-100">
                 <span>km {poi.kmRuta.toFixed(2)}</span>
                 {poi.verificacion?.estado === 'verificado' && (
-                  <span className="text-emerald-600 font-bold">✓ Verificado</span>
+                  <span className="text-emerald-600 font-bold">
+                    ✓ {lang === 'en' ? 'Verified' : 'Verificado'}
+                  </span>
                 )}
               </div>
             </div>
@@ -268,7 +272,7 @@ export default function MapView() {
         </Marker>
       );
     });
-  }, [filteredPois, activeCoords]);
+  }, [filteredPois, activeCoords, lang]);
 
   return (
     <div className="relative w-full h-[72vh] rounded-3xl overflow-hidden border border-stone-200 shadow-sm bg-stone-100 flex flex-col">
@@ -288,12 +292,12 @@ export default function MapView() {
           />
           <span className="font-medium">
             {!location.accuracy
-              ? 'Buscando GPS…'
+              ? t('gpsSearching', 'Buscando GPS…')
               : location.accuracy <= 10
-              ? `±${location.accuracy}m (Preciso)`
+              ? `±${location.accuracy}m (${lang === 'en' ? 'Accurate' : 'Preciso'})`
               : location.accuracy <= 30
-              ? `±${location.accuracy}m (Bueno)`
-              : `±${location.accuracy}m (Débil)`}
+              ? `±${location.accuracy}m (${lang === 'en' ? 'Good' : 'Bueno'})`
+              : `±${location.accuracy}m (${lang === 'en' ? 'Weak' : 'Débil'})`}
           </span>
         </div>
 
@@ -311,22 +315,22 @@ export default function MapView() {
           {devStatus === 'OFF_ROUTE' && <AlertTriangle size={14} />}
 
           <span>
-            {devStatus === 'ON_ROUTE' && 'EN RUTA OFICIAL'}
-            {devStatus === 'WARNING' && `COMPROBAR RUTA (${devDistance}m)`}
-            {devStatus === 'OFF_ROUTE' && `POSIBLE DESVÍO (${devDistance}m)`}
+            {devStatus === 'ON_ROUTE' && t('navOnRoute', 'EN RUTA OFICIAL')}
+            {devStatus === 'WARNING' && `${t('navCheckRoute', 'COMPROBAR RUTA')} (${devDistance}m)`}
+            {devStatus === 'OFF_ROUTE' && `${t('navOffRoute', 'POSIBLE DESVÍO')} (${devDistance}m)`}
           </span>
         </div>
       </div>
 
       {/* 2. Barra Flotante de Filtros de Categorías */}
       <div className="absolute top-16 left-4 right-4 z-[1000] overflow-x-auto no-scrollbar py-1 flex items-center gap-1.5 pointer-events-auto">
-        {CATEGORIAS_POIS.map((cat) => {
+        {categoriasPois.map((cat) => {
           const isActive = selectedCategory === cat.id;
           return (
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all shadow-md flex items-center gap-1 backdrop-blur-md border ${
+              className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all shadow-md flex items-center gap-1 backdrop-blur-md border cursor-pointer ${
                 isActive
                   ? 'bg-stone-900 text-white border-stone-700 scale-105'
                   : 'bg-white/90 text-stone-700 border-stone-200/80 hover:bg-white'
@@ -343,10 +347,10 @@ export default function MapView() {
       {!compass.permissionGranted && (
         <button
           onClick={compass.requestPermission}
-          className="absolute top-28 right-4 z-[1000] bg-stone-900/90 text-amber-300 text-xs font-bold px-3 py-2 rounded-full shadow-lg backdrop-blur-md border border-amber-500/40 flex items-center gap-1.5 active:scale-95 transition-all"
+          className="absolute top-28 right-4 z-[1000] bg-stone-900/90 text-amber-300 text-xs font-bold px-3 py-2 rounded-full shadow-lg backdrop-blur-md border border-amber-500/40 flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
         >
           <Compass size={14} className="animate-spin" />
-          <span>Activar Brújula</span>
+          <span>{lang === 'en' ? 'Enable Compass' : 'Activar Brújula'}</span>
         </button>
       )}
 
@@ -357,10 +361,10 @@ export default function MapView() {
       {!isTracking && (
         <button
           onClick={handleRecenter}
-          className="absolute bottom-6 right-4 z-[1000] bg-emerald-900 text-emerald-400 font-bold text-xs px-4 py-2.5 rounded-full shadow-xl hover:bg-emerald-950 active:scale-95 transition-all flex items-center gap-2 border border-emerald-700/50"
+          className="absolute bottom-6 right-4 z-[1000] bg-emerald-900 text-emerald-400 font-bold text-xs px-4 py-2.5 rounded-full shadow-xl hover:bg-emerald-950 active:scale-95 transition-all flex items-center gap-2 border border-emerald-700/50 cursor-pointer"
         >
           <Navigation size={14} className="fill-emerald-400" />
-          <span>Recentrar</span>
+          <span>{lang === 'en' ? 'Recenter' : 'Recentrar'}</span>
         </button>
       )}
 
@@ -385,9 +389,13 @@ export default function MapView() {
         <Marker position={activeCoords} icon={basePilgrimIcon}>
           <Popup>
             <div className="text-xs font-sans">
-              <p className="font-bold text-stone-900">Peregrino</p>
-              <p className="text-stone-500">Velocidad: {((location.speed || 0) * 3.6).toFixed(1)} km/h</p>
-              <p className="text-stone-500">Rumbo Híbrido: {compass.heading}°</p>
+              <p className="font-bold text-stone-900">{lang === 'en' ? 'Pilgrim' : 'Peregrino'}</p>
+              <p className="text-stone-500">
+                {t('speed', 'Velocidad')}: {((location.speed || 0) * 3.6).toFixed(1)} km/h
+              </p>
+              <p className="text-stone-500">
+                {lang === 'en' ? 'Heading' : 'Rumbo Híbrido'}: {compass.heading}°
+              </p>
             </div>
           </Popup>
         </Marker>

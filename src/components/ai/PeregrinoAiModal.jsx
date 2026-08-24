@@ -11,18 +11,20 @@ export default function PeregrinoAiModal({ isOpen, onClose }) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (messages.length === 0) {
-      setMessages([{ sender: 'bot', text: t('aiHello') }]);
-    }
+    setMessages([{ sender: 'bot', text: t('aiHello') || (lang === 'en' ? 'Hello! How can I help you on the Camino?' : '¡Hola! ¿En qué te puedo ayudar hoy en el Camino?') }]);
   }, [lang]);
 
   if (!isOpen) return null;
 
-  const quickPrompts = t('aiPrompts') || [
+  const quickPrompts = t('aiPrompts') || (lang === 'en' ? [
+    "Where is drinking water?",
+    "Where to eat in Betanzos?",
+    "Tips for blisters"
+  ] : [
     "¿Dónde hay agua potable?",
     "¿Dónde comer en Betanzos?",
     "Consejos para ampollas"
-  ];
+  ]);
 
   const handleSend = async (textToSend) => {
     const query = textToSend || input;
@@ -37,7 +39,7 @@ export default function PeregrinoAiModal({ isOpen, onClose }) {
       const responseText = await consultarIA(query, lang);
       setMessages((prev) => [...prev, { sender: 'bot', text: responseText }]);
     } catch (error) {
-      setMessages((prev) => [...prev, { sender: 'bot', text: t('aiError') }]);
+      setMessages((prev) => [...prev, { sender: 'bot', text: t('aiError') || (lang === 'en' ? 'Sorry, an error occurred.' : 'Error al consultar la IA.') }]);
     } finally {
       setLoading(false);
     }
@@ -55,12 +57,12 @@ export default function PeregrinoAiModal({ isOpen, onClose }) {
             </div>
             <div>
               <h3 className="text-sm font-bold flex items-center gap-1.5">
-                {t('aiTitle')} <span className="bg-emerald-900 text-emerald-300 text-[10px] px-2 py-0.5 rounded-full font-mono">v5.0</span>
+                {t('aiTitle') || "AI Copilot"} <span className="bg-emerald-900 text-emerald-300 text-[10px] px-2 py-0.5 rounded-full font-mono">v5.0</span>
               </h3>
-              <p className="text-[11px] text-stone-400">{t('aiSubtitle')}</p>
+              <p className="text-[11px] text-stone-400">{t('aiSubtitle') || "Betanzos → Hospital de Bruma"}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 text-stone-400 hover:text-white rounded-full bg-stone-800/50">
+          <button onClick={onClose} className="p-2 text-stone-400 hover:text-white rounded-full bg-stone-800/50 cursor-pointer">
             <X size={18} />
           </button>
         </div>
@@ -95,7 +97,7 @@ export default function PeregrinoAiModal({ isOpen, onClose }) {
             <button
               key={i}
               onClick={() => handleSend(p)}
-              className="text-[11px] bg-stone-800 hover:bg-stone-700 text-stone-300 px-3 py-1.5 rounded-full whitespace-nowrap border border-stone-700/50 transition-colors"
+              className="text-[11px] bg-stone-800 hover:bg-stone-700 text-stone-300 px-3 py-1.5 rounded-full whitespace-nowrap border border-stone-700/50 transition-colors cursor-pointer"
             >
               {p}
             </button>
@@ -109,12 +111,12 @@ export default function PeregrinoAiModal({ isOpen, onClose }) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            placeholder={t('aiInputPlaceholder')}
+            placeholder={t('aiInputPlaceholder') || (lang === 'en' ? "Ask a question..." : "Haz una pregunta...")}
             className="flex-1 bg-stone-800 text-xs text-white placeholder-stone-400 px-3.5 py-2.5 rounded-full border border-stone-700 focus:outline-none focus:border-emerald-500"
           />
           <button
             onClick={() => handleSend()}
-            className="p-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full transition-colors"
+            className="p-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full transition-colors cursor-pointer"
           >
             <Send size={16} />
           </button>
