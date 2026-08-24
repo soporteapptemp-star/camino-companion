@@ -1,71 +1,70 @@
-// Gestor de síntesis de voz y vibración con control de Cooldown
 class AudioAlertService {
   constructor() {
     this.lastSpokenTime = 0;
-    this.cooldownMs = 25000; // 25 segundos de silencio mínimo entre alertas consecutivas
+    this.cooldownMs = 25000;
     this.lastState = 'ON_ROUTE';
   }
 
-  // Comprueba si Web Speech API está disponible
   isSpeechAvailable() {
     return 'speechSynthesis' in window;
   }
 
-  // Reproduce un mensaje hablado
-  speak(message) {
+  speak(message, lang = 'es') {
     if (!this.isSpeechAvailable()) return;
 
-    // Cancelar audios anteriores en cola
     window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(message);
-    utterance.lang = 'es-ES';
-    utterance.rate = 1.0; // Velocidad normal
+    // Configura la voz según el idioma activo
+    utterance.lang = lang === 'en' ? 'en-US' : 'es-ES';
+    utterance.rate = 1.0;
     utterance.pitch = 1.0;
 
     window.speechSynthesis.speak(utterance);
   }
 
-  // Ejecuta vibración física en dispositivos compatibles
   vibrate(pattern) {
     if ('vibrate' in navigator) {
       navigator.vibrate(pattern);
     }
   }
 
-  // Evalúa y emite alertas según el estado y distancia
-  processAlert(status, distanceMeters) {
+  processAlert(status, distanceMeters, lang = 'es') {
     const now = Date.now();
 
-    // 🟢 ESTADO: EN RUTA (< 30m)
     if (status === 'ON_ROUTE') {
       if (this.lastState !== 'ON_ROUTE') {
-        // Notificación de recuperación al volver
-        this.speak('Has vuelto a la ruta oficial.');
-        this.vibrate([100, 50, 100]); // Pulsación doble corta
+        const msg = lang === 'en' 
+          ? 'You are back on the official route.' 
+          : 'Has vuelto a la ruta oficial.';
+        this.speak(msg, lang);
+        this.vibrate([100, 50, 100]);
         this.lastState = 'ON_ROUTE';
         this.lastSpokenTime = now;
       }
       return;
     }
 
-    // Comprobar Cooldown antes de alertas repetitivas
     if (now - this.lastSpokenTime < this.cooldownMs && this.lastState === status) {
       return;
     }
 
-    // 🟡 ESTADO: PRE-ALERTA / COMPROBAR RUTA (30m - 50m)
     if (status === 'WARNING') {
-      this.speak(`Atención. Te estás alejando de la ruta. Distancia: ${distanceMeters} metros.`);
-      this.vibrate([200, 100, 200]); // Dos vibraciones medias
+      const msg = lang === 'en'
+        ? `Warning. You are moving away from the route. Distance: ${distanceMeters} meters.`
+        : `Atención. Te estás alejando de la ruta. Distancia: ${distanceMeters} metros.`;
+      this.speak(msg, lang);
+      this.vibrate([200, 100, 200]);
       this.lastState = 'WARNING';
       this.lastSpokenTime = now;
     }
 
-    // 🔴 ESTADO: DESVÍO SOSTENIDO (> 50m)
     if (status === 'OFF_ROUTE') {
-      this.speak(`Alerta. Te has desviado de la ruta ${distanceMeters} metros. Revisa el mapa.`);
-      this.vibrate([400, 150, 400, 150, 400]); // Vibración fuerte y reiterada
+      const msg = lang === 'en'
+        ? `Alert. Off route by ${distanceMeters} meters. Check your map.`
+        : `Alerta. Te has desviado de la ruta ${distanceMeters} metros. Revisa el mapa.`;
+      this.speak(msg, lang);
+      this.vibrate([400, 150, 400, 150, 400]);
       this.lastState = 'OFF_ROUTE';
       this.lastSpokenTime = now;
     }

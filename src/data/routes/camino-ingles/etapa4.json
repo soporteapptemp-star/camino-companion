@@ -15,7 +15,8 @@
   },
   "siguienteIndicacion": {
     "distanciaM": 840,
-    "texto": "Cruza la Ponte das Cascas en dirección a As Travesas / Bruma"
+    "texto": "Cruza la Ponte das Cascas en dirección a As Travesas / Bruma",
+    "texto_en": "Cross the Ponte das Cascas bridge heading towards As Travesas / Bruma"
   },
   "coordenadas": [
     [43.281549, -8.211772],
@@ -248,7 +249,7 @@
     [43.171561, -8.32153],
     [43.171826, -8.322946],
     [43.171477, -8.324844],
-    [43.171087, -8.325805],
+    [43.17087, -8.325805],
     [43.170359, -8.326943],
     [43.170021, -8.327956],
     [43.169078, -8.332366],

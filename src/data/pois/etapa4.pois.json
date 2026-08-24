@@ -9,6 +9,7 @@
     "distanciaOffsetM": 15,
     "localidad": "Betanzos",
     "descripcion": "Farmacia principal antes de iniciar el tramo rural.",
+    "descripcion_en": "Main pharmacy before starting the rural section.",
     "verificacion": {
       "estado": "verificado",
       "fuente": "Sergas / Registro Sanitario Galego",
@@ -26,6 +27,7 @@
     "distanciaOffsetM": 40,
     "localidad": "Betanzos",
     "descripcion": "Supermercado completo para avituallamiento de agua y comida.",
+    "descripcion_en": "Full-service supermarket to stock up on food and water.",
     "verificacion": {
       "estado": "verificado",
       "fuente": "Directorio Local",
@@ -42,6 +44,7 @@
     "distanciaOffsetM": 0,
     "localidad": "Betanzos",
     "descripcion": "Fuente pública de agua potable junto al cruce del río.",
+    "descripcion_en": "Public drinking water fountain next to the river crossing.",
     "verificacion": {
       "estado": "verificado",
       "fuente": "Concello de Betanzos",
@@ -60,6 +63,7 @@
     "precio": "10€",
     "reserva": "Sin reserva",
     "descripcion": "Albergue público de la Xunta (16 plazas). Cocina, duchas y tendedero.",
+    "descripcion_en": "Public hostel managed by Xunta (16 beds). Kitchen, showers and laundry rack.",
     "verificacion": {
       "estado": "verificado",
       "fuente": "caminoingles.gal",
@@ -79,6 +83,7 @@
     "precio": "Menú disponible",
     "reserva": "Recomendada",
     "descripcion": "Restaurante e hito gastronómico en mitad de etapa. Menú del día y sellado.",
+    "descripcion_en": "Restaurant and gastronomic landmark midway through the stage. Daily menu and stamp available.",
     "verificacion": {
       "estado": "verificado",
       "fuente": "caminoingles.gal",
@@ -99,6 +104,7 @@
     "precio": "10€",
     "reserva": "Sin reserva",
     "descripcion": "Albergue público histórico en el enlace con la variante de A Coruña (32 plazas).",
+    "descripcion_en": "Historic public hostel at the junction with the A Coruña route (32 beds).",
     "verificacion": {
       "estado": "verificado",
       "fuente": "caminoingles.gal",
@@ -119,6 +125,7 @@
     "precio": "Con reserva",
     "reserva": "Disponible",
     "descripcion": "Alojamiento privado en meta con habitaciones individuales, literas y bar con terraza.",
+    "descripcion_en": "Private accommodation at the finish line with private rooms, bunk beds, and a bar with terrace.",
     "verificacion": {
       "estado": "verificado",
       "fuente": "Directorio Hostelería Galicia",

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 
-// Auxiliar: Distancia haversine en metros
 function getDistanceMeters(lat1, lon1, lat2, lon2) {
   const R = 6371000;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -14,7 +13,7 @@ function getDistanceMeters(lat1, lon1, lat2, lon2) {
   return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
 }
 
-export function useContextualCopilot(userCoords, activePois, totalKm = 24.1, kmCurrent = 0) {
+export function useContextualCopilot(userCoords, activePois, totalKm = 24.1, kmCurrent = 0, lang = 'es') {
   const [contextualNotice, setContextualNotice] = useState(null);
 
   useEffect(() => {
@@ -38,8 +37,10 @@ export function useContextualCopilot(userCoords, activePois, totalKm = 24.1, kmC
       );
       setContextualNotice({
         type: 'WATER_NEAR',
-        title: 'Fuente Próxima 💧',
-        message: `${nearbyWater.nombre} a unos ${distMeters}m. Buen momento para rellenar agua.`,
+        title: lang === 'en' ? 'Nearby Water Fountain 💧' : 'Fuente Próxima 💧',
+        message: lang === 'en'
+          ? `${nearbyWater.nombre} is about ${distMeters}m away. Good time to refill water.`
+          : `${nearbyWater.nombre} a unos ${distMeters}m. Buen momento para rellenar agua.`,
         priority: 2,
       });
       return;
@@ -50,16 +51,17 @@ export function useContextualCopilot(userCoords, activePois, totalKm = 24.1, kmC
     if (kmRemaining > 0 && kmRemaining <= 1.0) {
       setContextualNotice({
         type: 'FINISH_NEAR',
-        title: '¡Final de Etapa cerca! 🏁',
-        message: `Te quedan aprox. ${(kmRemaining * 1000).toFixed(0)}m para llegar a Hospital de Bruma.`,
+        title: lang === 'en' ? 'Stage Finish Ahead! 🏁' : '¡Final de Etapa cerca! 🏁',
+        message: lang === 'en'
+          ? `About ${(kmRemaining * 1000).toFixed(0)}m left to reach Hospital de Bruma.`
+          : `Te quedan aprox. ${(kmRemaining * 1000).toFixed(0)}m para llegar a Hospital de Bruma.`,
         priority: 1,
       });
       return;
     }
 
-    // Sin avisos prioritarios activos
     setContextualNotice(null);
-  }, [userCoords, activePois, totalKm, kmCurrent]);
+  }, [userCoords, activePois, totalKm, kmCurrent, lang]);
 
   return contextualNotice;
 }
