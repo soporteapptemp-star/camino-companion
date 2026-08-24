@@ -2,17 +2,19 @@ import React, { useState } from 'react';
 import PoiCard from '../../components/pois/PoiCard';
 import poisEtapa4 from '../../data/pois/etapa4.pois.json';
 import { Bed, Utensils, HeartPulse, Droplet, ShoppingBag, Layers } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function PlacesPage() {
+  const { t } = useLanguage();
   const [filter, setFilter] = useState('todos');
 
   const categories = [
-    { id: 'todos', label: 'Todos', icon: Layers },
-    { id: 'alojamiento', label: 'Dormir', icon: Bed },
-    { id: 'agua', label: 'Agua', icon: Droplet },
-    { id: 'restauracion', label: 'Comer', icon: Utensils },
-    { id: 'comida', label: 'Supermercado', icon: ShoppingBag },
-    { id: 'salud', label: 'Salud', icon: HeartPulse },
+    { id: 'todos', label: t('places.all') || 'Todos', icon: Layers },
+    { id: 'alojamiento', label: t('places.sleep') || 'Dormir', icon: Bed },
+    { id: 'agua', label: t('places.water') || 'Agua', icon: Droplet },
+    { id: 'restauracion', label: t('places.eat') || 'Comer', icon: Utensils },
+    { id: 'comida', label: t('places.market') || 'Supermercado', icon: ShoppingBag },
+    { id: 'salud', label: t('places.health') || 'Salud', icon: HeartPulse },
   ];
 
   const filteredPois = filter === 'todos'
@@ -20,11 +22,11 @@ export default function PlacesPage() {
     : poisEtapa4.filter((poi) => poi.categoria === filter);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-24">
       <div>
-        <h2 className="text-2xl font-black text-stone-900">Servicios en Ruta</h2>
+        <h2 className="text-2xl font-black text-stone-900">{t('places.title') || 'Servicios en Ruta'}</h2>
         <p className="text-xs text-stone-500 font-medium">
-          Puntos clave verificados de Betanzos a Hospital de Bruma (24.1 km)
+          {t('places.subtitle') || 'Puntos clave verificados de Betanzos a Hospital de Bruma (24.1 km)'}
         </p>
       </div>
 
@@ -56,7 +58,9 @@ export default function PlacesPage() {
           filteredPois.map((poi) => <PoiCard key={poi.id} poi={poi} />)
         ) : (
           <div className="p-8 text-center bg-white rounded-3xl border border-stone-200">
-            <p className="text-xs text-stone-500 font-bold">No hay servicios en esta categoría para el tramo actual.</p>
+            <p className="text-xs text-stone-500 font-bold">
+              {t('places.empty') || 'No hay servicios en esta categoría para el tramo actual.'}
+            </p>
           </div>
         )}
       </div>

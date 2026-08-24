@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Volume2, VolumeX, ShieldAlert, Database, Smartphone, Info } from 'lucide-react';
+import { Volume2, VolumeX, ShieldAlert, Database } from 'lucide-react';
 import { audioAlertService } from '../../utils/audioAlerts';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function SettingsView() {
+  const { t } = useLanguage();
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [sensitivity, setSensitivity] = useState('50'); // metros
   const [cacheCleared, setCacheCleared] = useState(false);
@@ -10,7 +12,6 @@ export default function SettingsView() {
   const toggleSound = () => {
     const nextState = !soundEnabled;
     setSoundEnabled(nextState);
-    // Si silencia, enviamos una orden al servicio de audio
     if (!nextState && window.speechSynthesis) {
       window.speechSynthesis.cancel();
     }
@@ -32,8 +33,8 @@ export default function SettingsView() {
     <div className="p-4 space-y-4 max-w-md mx-auto pb-24">
       {/* Header */}
       <div className="border-b border-stone-200 pb-3">
-        <h2 className="text-lg font-black text-stone-900">Configuración</h2>
-        <p className="text-xs text-stone-500">Personaliza las alertas y el consumo de tu copiloto</p>
+        <h2 className="text-lg font-black text-stone-900">{t('settings.title')}</h2>
+        <p className="text-xs text-stone-500">{t('settings.subtitle')}</p>
       </div>
 
       {/* 1. Alertas de Audio */}
@@ -44,8 +45,8 @@ export default function SettingsView() {
               {soundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
             </div>
             <div>
-              <p className="text-xs font-bold text-stone-900">Alertas por Voz y Audio</p>
-              <p className="text-[10px] text-stone-500">Anuncios hablados de desvío y POIs</p>
+              <p className="text-xs font-bold text-stone-900">{t('settings.voiceAlerts')}</p>
+              <p className="text-[10px] text-stone-500">{t('settings.voiceDesc')}</p>
             </div>
           </div>
           <button
@@ -70,16 +71,16 @@ export default function SettingsView() {
             <ShieldAlert size={18} />
           </div>
           <div>
-            <p className="text-xs font-bold text-stone-900">Tolerancia de Desvío</p>
-            <p className="text-[10px] text-stone-500">Distancia previa a considerar desvío oficial</p>
+            <p className="text-xs font-bold text-stone-900">{t('settings.sensitivity')}</p>
+            <p className="text-[10px] text-stone-500">{t('settings.sensitivityDesc')}</p>
           </div>
         </div>
 
         <div className="grid grid-cols-3 gap-2 pt-1">
           {[
-            { label: 'Estricto', val: '30' },
-            { label: 'Normal', val: '50' },
-            { label: 'Relaxed', val: '80' },
+            { label: t('settings.strict'), val: '30' },
+            { label: t('settings.normal'), val: '50' },
+            { label: t('settings.relax'), val: '80' },
           ].map((item) => (
             <button
               key={item.val}
@@ -90,7 +91,7 @@ export default function SettingsView() {
                   : 'bg-stone-50 text-stone-600 border-stone-200 hover:bg-stone-100'
               }`}
             >
-              {item.label} ({item.val}m)
+              {item.label}
             </button>
           ))}
         </div>
@@ -104,8 +105,8 @@ export default function SettingsView() {
               <Database size={18} />
             </div>
             <div>
-              <p className="text-xs font-bold text-stone-900">Almacenamiento Offline</p>
-              <p className="text-[10px] text-stone-500">Gestión de mapas y recursos locales</p>
+              <p className="text-xs font-bold text-stone-900">{t('settings.offlineData')}</p>
+              <p className="text-[10px] text-stone-500">{t('settings.offlineDesc')}</p>
             </div>
           </div>
         </div>
@@ -114,7 +115,7 @@ export default function SettingsView() {
           onClick={handleClearCache}
           className="w-full py-2.5 text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 rounded-xl hover:bg-rose-100 transition-colors"
         >
-          {cacheCleared ? '✓ Caché Limpiada' : 'Limpiar Caché de Mapas'}
+          {cacheCleared ? '✓ Caché Limpiada' : t('settings.clearCache')}
         </button>
       </div>
 

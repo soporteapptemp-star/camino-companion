@@ -1,25 +1,27 @@
 import React from 'react';
 import { MapPin, Phone, ShieldCheck, Droplet, HeartPulse, ShoppingBag, Utensils, Bed, Compass, Heart } from 'lucide-react';
 import { useFavorites } from '../../hooks/useFavorites';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function PoiCard({ poi }) {
+  const { t } = useLanguage();
   const { isFavorite, toggleFavorite } = useFavorites();
   const favorite = isFavorite(poi.id);
 
   const getCategoryBadge = (categoria) => {
     switch (categoria) {
       case 'agua':
-        return { label: '💧 Agua', bg: 'bg-cyan-100 text-cyan-900', icon: Droplet };
+        return { label: `💧 ${t('places.water')}`, bg: 'bg-cyan-100 text-cyan-900' };
       case 'salud':
-        return { label: '💊 Salud', bg: 'bg-rose-100 text-rose-900', icon: HeartPulse };
+        return { label: `💊 ${t('places.health')}`, bg: 'bg-rose-100 text-rose-900' };
       case 'comida':
-        return { label: '🛒 Comida', bg: 'bg-amber-100 text-amber-900', icon: ShoppingBag };
+        return { label: `🛒 ${t('places.market')}`, bg: 'bg-amber-100 text-amber-900' };
       case 'restauracion':
-        return { label: '🍽️ Comer', bg: 'bg-orange-100 text-orange-900', icon: Utensils };
+        return { label: `🍽️ ${t('places.eat')}`, bg: 'bg-orange-100 text-orange-900' };
       case 'alojamiento':
-        return { label: '🛏️ Dormir', bg: 'bg-emerald-100 text-emerald-900', icon: Bed };
+        return { label: `🛏️ ${t('places.sleep')}`, bg: 'bg-emerald-100 text-emerald-900' };
       default:
-        return { label: '📍 Servicio', bg: 'bg-stone-100 text-stone-800', icon: Compass };
+        return { label: '📍 Servicio', bg: 'bg-stone-100 text-stone-800' };
     }
   };
 
@@ -28,7 +30,6 @@ export default function PoiCard({ poi }) {
 
   return (
     <div className="bg-white rounded-3xl p-5 border border-stone-200/80 shadow-sm space-y-3 relative">
-      {/* Header con Categoría, Verificación y Favorito */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <span className={`text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full ${badge.bg}`}>
@@ -38,16 +39,14 @@ export default function PoiCard({ poi }) {
           {isVerified && (
             <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/60">
               <ShieldCheck size={12} />
-              <span>Verificado {poi.verificacion.fecha}</span>
+              <span>✓ {poi.verificacion.fecha}</span>
             </div>
           )}
         </div>
 
-        {/* Botón Guardar en Favoritos Offline */}
         <button
           onClick={() => toggleFavorite(poi.id)}
           className="p-1.5 rounded-full hover:bg-stone-100 transition-colors"
-          title={favorite ? "Quitar de Favoritos" : "Guardar en Favoritos"}
         >
           <Heart 
             size={18} 
@@ -56,7 +55,6 @@ export default function PoiCard({ poi }) {
         </button>
       </div>
 
-      {/* Nombre y Detalles */}
       <div>
         <div className="flex items-start justify-between gap-2">
           <h3 className="text-base font-black text-stone-900 leading-snug">
@@ -73,7 +71,6 @@ export default function PoiCard({ poi }) {
         </p>
       </div>
 
-      {/* Footer con Puntos Kilométricos y Teléfono */}
       <div className="pt-3 border-t border-stone-100 flex items-center justify-between">
         <div className="flex items-center gap-2 text-xs font-bold text-stone-600">
           <div className="flex items-center gap-1">

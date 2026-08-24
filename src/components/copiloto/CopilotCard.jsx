@@ -3,19 +3,20 @@ import { Navigation, Volume2, VolumeX, Utensils, MessageSquare, ArrowLeft } from
 import PeregrinoAiModal from '../ai/PeregrinoAiModal';
 import { useRouteStatus, ROUTE_STATES } from '../../hooks/useRouteStatus';
 import etapa4Data from '../../data/routes/camino-ingles/etapa4.json';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function CopilotCard({ distanceToGpx = 0, speed: propSpeed }) {
+  const { t, lang } = useLanguage();
   const [isAiOpen, setIsAiOpen] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const lastSpokenRef = useRef('');
-  
-  // Hook central de Navegación con Histéresis
+
+  // Hook central de Navegación
   const { routeState, distanceToGpx: distance, accuracy, speed: hookSpeed, gpsStatus, error } = useRouteStatus(distanceToGpx);
 
   const nextService = etapa4Data?.proximoServicio;
   const nextIndication = etapa4Data?.siguienteIndicacion;
 
-  // Cálculo seguro de velocidad: prioriza la prop procesada (km/h) si viene definida, sino usa la del hook
   const displaySpeed = useMemo(() => {
     if (propSpeed !== undefined && propSpeed !== null) {
       return propSpeed;
@@ -25,12 +26,12 @@ export default function CopilotCard({ distanceToGpx = 0, speed: propSpeed }) {
     return isNaN(calculated) ? '0.0' : calculated.toFixed(1);
   }, [propSpeed, hookSpeed]);
 
-  // Locuciones de voz (TTS)
+  // Locuciones de voz (TTS) con idioma dinámico
   const speakAnnouncement = (text) => {
     if (isMuted || !('speechSynthesis' in window) || lastSpokenRef.current === text) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'es-ES';
+    utterance.lang = lang === 'en' ? 'en-US' : 'es-ES';
     utterance.rate = 0.95;
     window.speechSynthesis.speak(utterance);
     lastSpokenRef.current = text;
@@ -38,30 +39,31 @@ export default function CopilotCard({ distanceToGpx = 0, speed: propSpeed }) {
 
   useEffect(() => {
     if (nextIndication && nextIndication.texto) {
-      speakAnnouncement(`En ${nextIndication.distanciaM} metros, ${nextIndication.texto}`);
+      const text = lang === 'en' 
+        ? `In ${nextIndication.distanciaM} meters, follow indication`
+        : `En ${nextIndication.distanciaM} metros, ${nextIndication.texto}`;
+      speakAnnouncement(text);
     }
-  }, [nextIndication?.texto, isMuted]);
+  }, [nextIndication?.texto, isMuted, lang]);
 
-  // Estado visual del GPS
   const isSearching = gpsStatus === 'SEARCHING' || accuracy === null;
   const hasError = !!error;
 
-  // Estilos y badges dinámicos según el RouteState unificado
   const statusConfig = {
     [ROUTE_STATES.ON_ROUTE]: {
-      label: 'EN RUTA OFICIAL',
+      label: t('navOnRoute'),
       cardGradient: 'from-emerald-800 to-emerald-950 border-emerald-700/50',
       badgeBg: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
       iconColor: 'text-emerald-300 fill-emerald-300'
     },
     [ROUTE_STATES.CHECK_ROUTE]: {
-      label: `COMPROBAR RUTA (${distance}m)`,
+      label: `${t('navCheckRoute')} (${distance}m)`,
       cardGradient: 'from-amber-900 to-amber-950 border-amber-700/50',
       badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
       iconColor: 'text-amber-300 fill-amber-300'
     },
     [ROUTE_STATES.OFF_ROUTE]: {
-      label: `POSIBLE DESVÍO (${distance}m)`,
+      label: `${t('navOffRoute')} (${distance}m)`,
       cardGradient: 'from-rose-900 to-rose-950 border-rose-700/50',
       badgeBg: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
       iconColor: 'text-rose-300 fill-rose-300'
@@ -72,7 +74,7 @@ export default function CopilotCard({ distanceToGpx = 0, speed: propSpeed }) {
 
   return (
     <div className="space-y-4 font-sans">
-      {/* TARJETA 1: Alerta / Estado de Navegación Sincronizado */}
+      {/* TARJETA 1: Alerta / Estado de Navegación */}
       <div className={`bg-gradient-to-br ${currentStatus.cardGradient} text-white rounded-3xl p-5 shadow-lg relative overflow-hidden border transition-all duration-300`}>
         <div className="flex items-center justify-between mb-3">
           <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-sm">
@@ -83,23 +85,23 @@ export default function CopilotCard({ distanceToGpx = 0, speed: propSpeed }) {
           </span>
         </div>
 
-        <p className="text-xs uppercase tracking-wider text-emerald-200 font-bold">Navegación Activa</p>
+        <p className="text-xs uppercase tracking-wider text-emerald-200 font-bold">{t('navActive')}</p>
         <h2 className="text-xl font-black tracking-tight leading-snug mt-1">
           {etapa4Data.origen} → {etapa4Data.destino}
         </h2>
         <p className="text-xs text-emerald-100/90 mt-1 font-medium">
           {routeState === ROUTE_STATES.OFF_ROUTE 
-            ? 'Te has alejado del trazado. Revisa la pantalla del mapa para reconectar.' 
-            : `Sigue las flechas amarillas hacia ${etapa4Data.destino}`}
+            ? t('navOffWarning') 
+            : `${t('navFollow')} ${etapa4Data.destino}`}
         </p>
       </div>
 
-      {/* TARJETA 2: Copiloto Inteligente (Métricas GPS en Tiempo Real) */}
+      {/* TARJETA 2: Copiloto Inteligente */}
       <div className="bg-stone-900 text-white rounded-3xl p-5 shadow-md border border-stone-800 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className={`w-2.5 h-2.5 rounded-full ${isSearching ? 'bg-amber-400 animate-pulse' : 'bg-emerald-500'}`} />
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Copiloto Inteligente</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">{t('aiTitle')}</span>
           </div>
           <div className="flex items-center gap-2">
             <button 
@@ -109,7 +111,6 @@ export default function CopilotCard({ distanceToGpx = 0, speed: propSpeed }) {
                 if (nextState) window.speechSynthesis?.cancel();
               }}
               className="p-2 bg-stone-800 rounded-full text-stone-300 hover:text-white transition-colors"
-              title={isMuted ? "Activar Voz" : "Silenciar Voz"}
             >
               {isMuted ? <VolumeX size={16} className="text-rose-400" /> : <Volume2 size={16} />}
             </button>
@@ -120,7 +121,7 @@ export default function CopilotCard({ distanceToGpx = 0, speed: propSpeed }) {
                   ? 'bg-red-950 text-red-400 border-red-800'
                   : 'bg-emerald-950 text-emerald-400 border-emerald-800'
             }`}>
-              {isSearching ? 'Buscando GPS...' : hasError ? 'Sin acceso GPS' : `GPS Precisión: ±${accuracy ?? 5}m`}
+              {isSearching ? t('gpsSearching') : hasError ? t('gpsNoAccess') : `${t('gpsPrecision')}: ±${accuracy ?? 5}m`}
             </span>
           </div>
         </div>
@@ -128,17 +129,17 @@ export default function CopilotCard({ distanceToGpx = 0, speed: propSpeed }) {
         {/* Métricas Reales */}
         <div className="grid grid-cols-3 gap-2 pt-1">
           <div className="bg-stone-800/80 p-3 rounded-2xl border border-stone-700/50 text-center">
-            <span className="text-[10px] uppercase font-bold text-stone-400 block">Velocidad</span>
+            <span className="text-[10px] uppercase font-bold text-stone-400 block">{t('speed')}</span>
             <span className="text-base font-black text-white">
               {displaySpeed} <span className="text-[10px] font-normal text-stone-400">km/h</span>
             </span>
           </div>
           <div className="bg-stone-800/80 p-3 rounded-2xl border border-stone-700/50 text-center">
-            <span className="text-[10px] uppercase font-bold text-stone-400 block">Total Etapa</span>
+            <span className="text-[10px] uppercase font-bold text-stone-400 block">{t('totalStage')}</span>
             <span className="text-base font-black text-white">{etapa4Data.distanciaTotalKm} <span className="text-[10px] font-normal text-stone-400">km</span></span>
           </div>
           <div className="bg-stone-800/80 p-3 rounded-2xl border border-stone-700/50 text-center">
-            <span className="text-[10px] uppercase font-bold text-stone-400 block">Dificultad</span>
+            <span className="text-[10px] uppercase font-bold text-stone-400 block">{t('difficulty')}</span>
             <span className="text-base font-black text-emerald-400">{etapa4Data.dificultad}</span>
           </div>
         </div>
@@ -151,7 +152,7 @@ export default function CopilotCard({ distanceToGpx = 0, speed: propSpeed }) {
                 <Utensils size={18} />
               </div>
               <div>
-                <span className="text-[10px] font-bold text-stone-400 uppercase block leading-none">Próximo servicio</span>
+                <span className="text-[10px] font-bold text-stone-400 uppercase block leading-none">{t('nextService')}</span>
                 <span className="text-sm font-bold text-stone-100">{nextService.nombre}</span>
               </div>
             </div>
@@ -162,7 +163,7 @@ export default function CopilotCard({ distanceToGpx = 0, speed: propSpeed }) {
         )}
       </div>
 
-      {/* TARJETA 3: Asistente IA del Peregrino */}
+      {/* TARJETA 3: Asistente IA */}
       <button 
         onClick={() => setIsAiOpen(true)}
         className="w-full bg-gradient-to-r from-emerald-800 to-teal-900 text-white rounded-3xl p-5 text-left shadow-md hover:opacity-95 transition-all flex items-start justify-between group cursor-pointer"
@@ -170,27 +171,26 @@ export default function CopilotCard({ distanceToGpx = 0, speed: propSpeed }) {
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <MessageSquare size={16} className="text-emerald-300" />
-            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-200">Asistente IA del Peregrino</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-200">{t('aiTitle')}</span>
           </div>
-          <h3 className="text-base font-black text-white leading-snug">¿Dudas sobre la etapa u hostales?</h3>
-          <p className="text-xs text-emerald-100/80 font-medium">Pregunta sobre agua, ampollas, menú o albergues</p>
+          <h3 className="text-base font-black text-white leading-snug">{t('aiQuestion')}</h3>
+          <p className="text-xs text-emerald-100/80 font-medium">{t('aiDescription')}</p>
         </div>
       </button>
 
-      {/* TARJETA 4: Siguiente Giro / Indicación Oficial */}
+      {/* TARJETA 4: Siguiente Giro */}
       {nextIndication && (
         <div className="bg-slate-900 text-white rounded-2xl p-4 flex items-center gap-3 border border-slate-800">
           <div className="p-3 bg-emerald-900/80 rounded-xl text-emerald-400">
             <ArrowLeft size={22} />
           </div>
           <div>
-            <span className="text-[10px] font-bold text-emerald-400 uppercase block">En {nextIndication.distanciaM} metros</span>
+            <span className="text-[10px] font-bold text-emerald-400 uppercase block">{t('inMeters')} {nextIndication.distanciaM} {t('meters')}</span>
             <p className="text-xs font-bold text-stone-100">{nextIndication.texto}</p>
           </div>
         </div>
       )}
 
-      {/* Modal de IA */}
       <PeregrinoAiModal isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} />
     </div>
   );

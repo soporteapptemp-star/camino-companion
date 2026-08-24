@@ -2,8 +2,16 @@ import React from 'react';
 import { AlertCircle, Thermometer, CloudRain, ChevronDown } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
-export default function Header({ currentStage = "Camino Inglés · Etapa 4", userName = "Peregrino" }) {
+export default function Header({ currentStage = "Camino Inglés · Etapa 4", userName = "Peregrino", onOpenSos }) {
   const { lang, toggleLanguage, t } = useLanguage();
+
+  const handleSosClick = () => {
+    if (onOpenSos) {
+      onOpenSos();
+    } else {
+      window.location.hash = '#sos';
+    }
+  };
 
   return (
     <header className="pt-4 px-4 pb-2 max-w-md mx-auto">
@@ -39,7 +47,10 @@ export default function Header({ currentStage = "Camino Inglés · Etapa 4", use
             <span className="flex items-center gap-0.5 text-sky-600"><CloudRain size={13} /> 15%</span>
           </div>
 
-          <button className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md flex items-center gap-1 active:scale-95 transition-all">
+          <button 
+            onClick={handleSosClick}
+            className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md flex items-center gap-1 active:scale-95 transition-all cursor-pointer"
+          >
             <AlertCircle size={14} />
             <span>{t('sos')}</span>
           </button>

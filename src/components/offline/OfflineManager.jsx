@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { downloadStageTiles, checkTilesDownloaded } from '../../utils/offlineTileDownloader';
 import { Download, CheckCircle2, Wifi, WifiOff, RefreshCw } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function OfflineManager() {
+  const { t } = useLanguage();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isDownloaded, setIsDownloaded] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  // Detector de estado de red en tiempo real
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
@@ -16,7 +17,6 @@ export default function OfflineManager() {
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
-    // Comprobar si los tiles ya están precacheados
     checkTilesDownloaded().then((downloaded) => setIsDownloaded(downloaded));
 
     return () => {
@@ -27,7 +27,7 @@ export default function OfflineManager() {
 
   const handleDownload = async () => {
     if (!isOnline) {
-      alert('Necesitas conexión a Internet para descargar el mapa de la etapa.');
+      alert(t('offline.alertNoInternet'));
       return;
     }
 
@@ -54,11 +54,11 @@ export default function OfflineManager() {
         <div className="flex items-center gap-2">
           {isOnline ? (
             <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-              <Wifi size={13} /> 🟢 ONLINE
+              <Wifi size={13} /> 🟢 {t('offline.onlineStatus')}
             </span>
           ) : (
             <span className="flex items-center gap-1.5 text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
-              <WifiOff size={13} /> 🟠 OFFLINE
+              <WifiOff size={13} /> 🟠 {t('offline.offlineStatus')}
             </span>
           )}
         </div>
@@ -67,11 +67,11 @@ export default function OfflineManager() {
         <div className="text-right">
           {isDownloaded ? (
             <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
-              <CheckCircle2 size={14} /> Ruta descargada ✓
+              <CheckCircle2 size={14} /> {t('offline.downloaded')}
             </span>
           ) : (
             <span className="text-xs font-bold text-rose-500">
-              Mapa no descargado 🛑
+              {t('offline.notDownloaded')}
             </span>
           )}
         </div>
@@ -79,8 +79,8 @@ export default function OfflineManager() {
 
       {/* 2. Info de la Etapa */}
       <div>
-        <h4 className="font-bold text-stone-800 text-sm">Betanzos → Hospital de Bruma</h4>
-        <p className="text-xs text-stone-500">Etapa 4 • 24,1 km • Incluye Mapa, Ruta y POIs</p>
+        <h4 className="font-bold text-stone-800 text-sm">{t('offline.stageInfo')}</h4>
+        <p className="text-xs text-stone-500">{t('offline.stageSub')}</p>
       </div>
 
       {/* 3. Botón de Acción / Progreso */}
@@ -88,7 +88,7 @@ export default function OfflineManager() {
         <div className="space-y-1.5">
           <div className="flex justify-between text-xs text-stone-600 font-medium">
             <span className="flex items-center gap-1">
-              <RefreshCw size={12} className="animate-spin text-emerald-600" /> Descargando mapa de la etapa…
+              <RefreshCw size={12} className="animate-spin text-emerald-600" /> {t('offline.downloading')}
             </span>
             <span>{progress}%</span>
           </div>
@@ -113,11 +113,11 @@ export default function OfflineManager() {
         >
           {isDownloaded ? (
             <>
-              <CheckCircle2 size={15} /> ETAPA LISTA PARA MODO AVIÓN
+              <CheckCircle2 size={15} /> {t('offline.readyFlightMode')}
             </>
           ) : (
             <>
-              <Download size={15} /> DESCARGAR ETAPA OFFLINE
+              <Download size={15} /> {t('offline.downloadBtn')}
             </>
           )}
         </button>

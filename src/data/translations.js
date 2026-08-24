@@ -37,6 +37,65 @@ export const translations = {
       lugares: "Lugares",
       favoritos: "Favoritos",
       ajustes: "Ajustes"
+    },
+    settings: {
+      title: 'Ajustes',
+      subtitle: 'Configuración del copiloto, audio y opciones de seguridad',
+      selectedRoute: 'Ruta Seleccionada',
+      voiceAlerts: 'Alertas por Voz',
+      voiceDesc: 'Avisos hablados de desvío y POIs',
+      sensitivity: 'Sensibilidad de Desvío',
+      sensitivityDesc: 'Tolerancia antes de alertar por voz/vibración',
+      strict: 'Estricto (30m)',
+      normal: 'Normal (50m)',
+      relax: 'Relax (80m)',
+      offlineData: 'Datos Offline',
+      offlineDesc: 'Gestión de la caché de mapas local',
+      clearCache: 'Limpiar Caché de Mapas',
+      sosTitle: 'Modo Emergencia SOS',
+      sosDesc: 'Contacto directo con emergencias 112',
+      call112: 'Llamar al 112'
+    },
+    favorites: {
+      title: 'Lugares Guardados',
+      subtitle: 'Tus alojamientos y puntos de interés marcados para la etapa',
+      emptyTitle: 'No tienes favoritos aún',
+      emptyDesc: 'Guarda albergues o restaurantes desde la pestaña Lugares para consultarlos sin conexión.'
+    },
+    places: {
+      title: 'Servicios en Ruta',
+      subtitle: 'Puntos clave verificados de Betanzos a Hospital de Bruma (24.1 km)',
+      all: 'Todos',
+      sleep: 'Dormir',
+      water: 'Agua',
+      eat: 'Comer',
+      market: 'Supermercado',
+      health: 'Salud',
+      empty: 'No hay servicios en esta categoría para el tramo actual.'
+    },
+    offline: {
+      onlineStatus: 'ONLINE',
+      offlineStatus: 'OFFLINE',
+      downloaded: 'Ruta descargada ✓',
+      notDownloaded: 'Mapa no descargado 🛑',
+      stageInfo: 'Betanzos → Hospital de Bruma',
+      stageSub: 'Etapa 4 • 24,1 km • Incluye Mapa, Ruta y POIs',
+      downloading: 'Descargando mapa de la etapa…',
+      readyFlightMode: 'ETAPA LISTA PARA MODO AVIÓN',
+      downloadBtn: 'DESCARGAR ETAPA OFFLINE',
+      alertNoInternet: 'Necesitas conexión a Internet para descargar el mapa de la etapa.'
+    },
+    sosModal: {
+      btnLabel: 'EMERGENCIA / SOS 112',
+      protocolTitle: 'Protocolo de Emergencia',
+      positionTitle: 'Tu Posición Actual (Dictar al 112)',
+      gpsMargin: 'Margen de error GPS: ±',
+      gpsSearching: 'Obteniendo señal GPS precisa...',
+      callBtn: 'Llamar al 112 (Gratuito)',
+      sendSmsBtn: 'Enviar Coordenadas por SMS',
+      copyBtn: 'Copiar Texto de Ubicación',
+      copiedBtn: '¡Coordenadas copiadas!',
+      footerNotice: 'El 112 funciona incluso sin cobertura de tu operador utilizando cualquier red disponible en la zona.'
     }
   },
   en: {
@@ -77,6 +136,65 @@ export const translations = {
       lugares: "Places",
       favoritos: "Favorites",
       ajustes: "Settings"
+    },
+    settings: {
+      title: 'Settings',
+      subtitle: 'Copilot configuration, audio, and safety options',
+      selectedRoute: 'Selected Route',
+      voiceAlerts: 'Voice Alerts',
+      voiceDesc: 'Spoken warnings for detours and POIs',
+      sensitivity: 'Detour Sensitivity',
+      sensitivityDesc: 'Tolerance before triggering voice/vibration alert',
+      strict: 'Strict (30m)',
+      normal: 'Normal (50m)',
+      relax: 'Relax (80m)',
+      offlineData: 'Offline Data',
+      offlineDesc: 'Manage local map cache',
+      clearCache: 'Clear Map Cache',
+      sosTitle: 'Emergency SOS Mode',
+      sosDesc: 'Direct contact with 112 emergency services',
+      call112: 'Call 112'
+    },
+    favorites: {
+      title: 'Saved Places',
+      subtitle: 'Your bookmarked hostels and points of interest for this stage',
+      emptyTitle: 'No favorites saved yet',
+      emptyDesc: 'Save hostels or restaurants from the Places tab to view them offline.'
+    },
+    places: {
+      title: 'Route Services',
+      subtitle: 'Verified key points from Betanzos to Hospital de Bruma (24.1 km)',
+      all: 'All',
+      sleep: 'Sleep',
+      water: 'Water',
+      eat: 'Eat',
+      market: 'Supermarket',
+      health: 'Health',
+      empty: 'No services found in this category for the current stage.'
+    },
+    offline: {
+      onlineStatus: 'ONLINE',
+      offlineStatus: 'OFFLINE',
+      downloaded: 'Stage downloaded ✓',
+      notDownloaded: 'Map not downloaded 🛑',
+      stageInfo: 'Betanzos → Hospital de Bruma',
+      stageSub: 'Stage 4 • 24.1 km • Includes Map, Route & POIs',
+      downloading: 'Downloading stage map…',
+      readyFlightMode: 'STAGE READY FOR AIRPLANE MODE',
+      downloadBtn: 'DOWNLOAD STAGE OFFLINE',
+      alertNoInternet: 'You need an internet connection to download the stage map.'
+    },
+    sosModal: {
+      btnLabel: 'EMERGENCY / SOS 112',
+      protocolTitle: 'Emergency Protocol',
+      positionTitle: 'Your Current Position (Dictate to 112)',
+      gpsMargin: 'GPS Accuracy margin: ±',
+      gpsSearching: 'Acquiring precise GPS signal...',
+      callBtn: 'Call 112 (Free)',
+      sendSmsBtn: 'Send Coordinates via SMS',
+      copyBtn: 'Copy Location Text',
+      copiedBtn: 'Coordinates copied!',
+      footerNotice: '112 works even without your operator coverage using any available network in the area.'
     }
   }
 };

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Compass, PhoneCall, ShieldAlert, Volume2, VolumeX, Database, Sliders } from 'lucide-react';
 import etapa4Data from '../../data/routes/camino-ingles/etapa4.json';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function SettingsPage() {
+  const { t } = useLanguage();
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [sensitivity, setSensitivity] = useState('50'); // metros
   const [cacheCleared, setCacheCleared] = useState(false);
@@ -30,9 +32,9 @@ export default function SettingsPage() {
   return (
     <div className="space-y-4 pb-24">
       <div>
-        <h2 className="text-2xl font-black text-stone-900">Ajustes</h2>
+        <h2 className="text-2xl font-black text-stone-900">{t('settings.title')}</h2>
         <p className="text-xs text-stone-500 font-medium">
-          Configuración del copiloto, audio y opciones de seguridad
+          {t('settings.subtitle')}
         </p>
       </div>
 
@@ -43,7 +45,7 @@ export default function SettingsPage() {
             <Compass size={20} />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-stone-900">Ruta Seleccionada</h3>
+            <h3 className="text-sm font-bold text-stone-900">{t('settings.selectedRoute')}</h3>
             <p className="text-xs text-stone-500">
               {etapa4Data.camino} · Etapa {etapa4Data.etapa} ({etapa4Data.origen} → {etapa4Data.destino})
             </p>
@@ -59,8 +61,8 @@ export default function SettingsPage() {
               {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
             </div>
             <div>
-              <h3 className="text-sm font-bold text-stone-900">Alertas por Voz</h3>
-              <p className="text-xs text-stone-500">Avisos hablados de desvío y POIs</p>
+              <h3 className="text-sm font-bold text-stone-900">{t('settings.voiceAlerts')}</h3>
+              <p className="text-xs text-stone-500">{t('settings.voiceDesc')}</p>
             </div>
           </div>
           <button
@@ -85,16 +87,16 @@ export default function SettingsPage() {
             <Sliders size={20} />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-stone-900">Sensibilidad de Desvío</h3>
-            <p className="text-xs text-stone-500">Tolerancia antes de alertar por voz/vibración</p>
+            <h3 className="text-sm font-bold text-stone-900">{t('settings.sensitivity')}</h3>
+            <p className="text-xs text-stone-500">{t('settings.sensitivityDesc')}</p>
           </div>
         </div>
 
         <div className="grid grid-cols-3 gap-2 pt-1">
           {[
-            { label: 'Estricto', val: '30' },
-            { label: 'Normal', val: '50' },
-            { label: 'Relax', val: '80' },
+            { label: t('settings.strict'), val: '30' },
+            { label: t('settings.normal'), val: '50' },
+            { label: t('settings.relax'), val: '80' },
           ].map((item) => (
             <button
               key={item.val}
@@ -105,7 +107,7 @@ export default function SettingsPage() {
                   : 'bg-stone-50 text-stone-600 border-stone-200 hover:bg-stone-100'
               }`}
             >
-              {item.label} ({item.val}m)
+              {item.label}
             </button>
           ))}
         </div>
@@ -119,8 +121,8 @@ export default function SettingsPage() {
               <Database size={20} />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-stone-900">Datos Offline</h3>
-              <p className="text-xs text-stone-500">Gestión de la caché de mapas local</p>
+              <h3 className="text-sm font-bold text-stone-900">{t('settings.offlineData')}</h3>
+              <p className="text-xs text-stone-500">{t('settings.offlineDesc')}</p>
             </div>
           </div>
         </div>
@@ -129,7 +131,7 @@ export default function SettingsPage() {
           onClick={handleClearCache}
           className="w-full py-2.5 text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 rounded-2xl hover:bg-rose-100 transition-colors"
         >
-          {cacheCleared ? '✓ Caché Limpiada Correctamente' : 'Limpiar Caché de Mapas'}
+          {cacheCleared ? '✓ Caché Limpiada Correctamente' : t('settings.clearCache')}
         </button>
       </div>
 
@@ -140,8 +142,8 @@ export default function SettingsPage() {
             <ShieldAlert size={20} />
           </div>
           <div>
-            <h3 className="text-sm font-bold">Modo Emergencia SOS</h3>
-            <p className="text-xs text-red-100">Contacto directo con emergencias 112</p>
+            <h3 className="text-sm font-bold">{t('settings.sosTitle')}</h3>
+            <p className="text-xs text-red-100">{t('settings.sosDesc')}</p>
           </div>
         </div>
         <a
@@ -149,7 +151,7 @@ export default function SettingsPage() {
           className="w-full bg-white text-red-700 font-bold text-xs py-2.5 rounded-full flex items-center justify-center gap-2 mt-2 shadow-md hover:bg-stone-100 transition-colors"
         >
           <PhoneCall size={14} />
-          <span>Llamar al 112</span>
+          <span>{t('settings.call112')}</span>
         </a>
       </div>
 

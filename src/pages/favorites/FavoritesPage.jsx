@@ -3,11 +3,12 @@ import { Bookmark } from 'lucide-react';
 import poisEtapa4 from '../../data/pois/etapa4.pois.json';
 import PoiCard from '../../components/pois/PoiCard';
 import { useFavorites } from '../../hooks/useFavorites';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function FavoritesPage() {
+  const { t } = useLanguage();
   const { favorites } = useFavorites();
 
-  // Filtrado de POIs guardados reales combinados con los datos offline de la etapa
   const savedPois = useMemo(() => {
     if (!favorites || favorites.length === 0) return [];
     return poisEtapa4.filter((poi) => favorites.includes(poi.id));
@@ -16,9 +17,9 @@ export default function FavoritesPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-2xl font-black text-stone-900">Lugares Guardados</h2>
+        <h2 className="text-2xl font-black text-stone-900">{t('favorites.title')}</h2>
         <p className="text-xs text-stone-500 font-medium">
-          Tus alojamientos y puntos de interés marcados para la etapa
+          {t('favorites.subtitle')}
         </p>
       </div>
 
@@ -33,9 +34,9 @@ export default function FavoritesPage() {
           <div className="w-12 h-12 bg-stone-100 rounded-2xl flex items-center justify-center mx-auto text-stone-400">
             <Bookmark size={24} />
           </div>
-          <p className="text-sm font-bold text-stone-700">No tienes favoritos aún</p>
+          <p className="text-sm font-bold text-stone-700">{t('favorites.emptyTitle')}</p>
           <p className="text-xs text-stone-500">
-            Guarda albergues o restaurantes desde la pestaña Lugares para consultarlos sin conexión.
+            {t('favorites.emptyDesc')}
           </p>
         </div>
       )}
