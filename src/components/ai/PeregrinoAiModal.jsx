@@ -10,7 +10,6 @@ export default function PeregrinoAiModal({ isOpen, onClose }) {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Inicializa el primer mensaje traducido según el idioma activo
   useEffect(() => {
     if (messages.length === 0) {
       setMessages([{ sender: 'bot', text: t('aiHello') }]);
@@ -35,7 +34,6 @@ export default function PeregrinoAiModal({ isOpen, onClose }) {
     setLoading(true);
 
     try {
-      // Enviamos la consulta indicando el idioma activo al servicio de la IA
       const responseText = await consultarIA(query, lang);
       setMessages((prev) => [...prev, { sender: 'bot', text: responseText }]);
     } catch (error) {
@@ -104,7 +102,7 @@ export default function PeregrinoAiModal({ isOpen, onClose }) {
           ))}
         </div>
 
-        {/* Input con margen para navegadores móviles */}
+        {/* Input */}
         <div className="p-3 pb-8 sm:pb-3 bg-stone-950/95 border-t border-stone-800 flex items-center gap-2 shrink-0">
           <input
             type="text"

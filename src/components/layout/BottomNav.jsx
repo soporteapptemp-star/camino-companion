@@ -1,6 +1,6 @@
 import React from 'react';
 import { Home, Map, MapPin, Heart, Settings } from 'lucide-react';
-import { useLanguage } from '../context/LanguageContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function BottomNav({ activeTab, setActiveTab }) {
   const { t } = useLanguage();
