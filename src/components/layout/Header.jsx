@@ -28,7 +28,7 @@ export default function Header({ currentStage = "Camino Inglés · Etapa 4", use
           {/* Botón Selector de Idioma */}
           <button
             onClick={toggleLanguage}
-            className="bg-stone-200/80 hover:bg-stone-300/80 text-stone-800 text-xs font-bold px-2 py-1 rounded-full border border-stone-300 transition-colors flex items-center gap-1"
+            className="bg-stone-200/80 hover:bg-stone-300/80 text-stone-800 text-xs font-bold px-2 py-1 rounded-full border border-stone-300 transition-colors flex items-center gap-1 cursor-pointer"
             title="Cambiar Idioma / Switch Language"
           >
             <span>{lang === 'es' ? '🇪🇸 ES' : '🇬🇧 EN'}</span>
