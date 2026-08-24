@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useState } from 'react';
-import { translations } from '../data/translations';
+import { translations } from '../data/translations.js';
 
 const LanguageContext = createContext();
 
 export function LanguageProvider({ children }) {
-  const [lang, setLang] = useState('es'); // 'es' o 'en'
+  const [lang, setLang] = useState('es');
 
   const t = (key) => {
     const keys = key.split('.');
