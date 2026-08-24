@@ -1,13 +1,16 @@
 import React from 'react';
 import { Home, Map, MapPin, Heart, Settings } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function BottomNav({ activeTab, setActiveTab }) {
+  const { t } = useLanguage();
+
   const tabs = [
-    { id: 'inicio', label: 'Inicio', icon: Home },
-    { id: 'ruta', label: 'Ruta', icon: Map },
-    { id: 'lugares', label: 'Lugares', icon: MapPin },
-    { id: 'favoritos', label: 'Favoritos', icon: Heart },
-    { id: 'ajustes', label: 'Ajustes', icon: Settings },
+    { id: 'inicio', label: t('tabs.inicio'), icon: Home },
+    { id: 'ruta', label: t('tabs.ruta'), icon: Map },
+    { id: 'lugares', label: t('tabs.lugares'), icon: MapPin },
+    { id: 'favoritos', label: t('tabs.favoritos'), icon: Heart },
+    { id: 'ajustes', label: t('tabs.ajustes'), icon: Settings },
   ];
 
   return (

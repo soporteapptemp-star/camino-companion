@@ -1,17 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Send, Bot, User, Sparkles } from 'lucide-react';
 import { consultarIA } from '../../services/ai/aiService';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function PeregrinoAiModal({ isOpen, onClose }) {
-  const [messages, setMessages] = useState([
-    { sender: 'bot', text: '¡Hola! Soy tu copiloto IA para el Camino Inglés. ¿En qué te puedo ayudar hoy?' }
-  ]);
+  const { t, lang } = useLanguage();
+
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Inicializa el primer mensaje traducido según el idioma activo
+  useEffect(() => {
+    if (messages.length === 0) {
+      setMessages([{ sender: 'bot', text: t('aiHello') }]);
+    }
+  }, [lang]);
+
   if (!isOpen) return null;
 
-  const quickPrompts = [
+  const quickPrompts = t('aiPrompts') || [
     "¿Dónde hay agua potable?",
     "¿Dónde comer en Betanzos?",
     "Consejos para ampollas"
@@ -27,10 +35,11 @@ export default function PeregrinoAiModal({ isOpen, onClose }) {
     setLoading(true);
 
     try {
-      const responseText = await consultarIA(query);
+      // Enviamos la consulta indicando el idioma activo al servicio de la IA
+      const responseText = await consultarIA(query, lang);
       setMessages((prev) => [...prev, { sender: 'bot', text: responseText }]);
     } catch (error) {
-      setMessages((prev) => [...prev, { sender: 'bot', text: 'Ups, no he podido procesar tu consulta ahora mismo.' }]);
+      setMessages((prev) => [...prev, { sender: 'bot', text: t('aiError') }]);
     } finally {
       setLoading(false);
     }
@@ -48,9 +57,9 @@ export default function PeregrinoAiModal({ isOpen, onClose }) {
             </div>
             <div>
               <h3 className="text-sm font-bold flex items-center gap-1.5">
-                Copiloto IA <span className="bg-emerald-900 text-emerald-300 text-[10px] px-2 py-0.5 rounded-full font-mono">v5.0</span>
+                {t('aiTitle')} <span className="bg-emerald-900 text-emerald-300 text-[10px] px-2 py-0.5 rounded-full font-mono">v5.0</span>
               </h3>
-              <p className="text-[11px] text-stone-400">Betanzos → Hospital de Bruma</p>
+              <p className="text-[11px] text-stone-400">{t('aiSubtitle')}</p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 text-stone-400 hover:text-white rounded-full bg-stone-800/50">
@@ -77,14 +86,14 @@ export default function PeregrinoAiModal({ isOpen, onClose }) {
           {loading && (
             <div className="flex items-center gap-2 text-xs text-stone-400 italic pl-8">
               <Sparkles size={14} className="animate-spin text-emerald-400" />
-              <span>Consultando guía del Camino...</span>
+              <span>{lang === 'en' ? 'Searching guide...' : 'Consultando guía del Camino...'}</span>
             </div>
           )}
         </div>
 
         {/* Quick Prompts */}
         <div className="px-4 py-2 border-t border-stone-800/60 flex items-center gap-2 overflow-x-auto scrollbar-none shrink-0">
-          {quickPrompts.map((p, i) => (
+          {Array.isArray(quickPrompts) && quickPrompts.map((p, i) => (
             <button
               key={i}
               onClick={() => handleSend(p)}
@@ -102,7 +111,7 @@ export default function PeregrinoAiModal({ isOpen, onClose }) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Escribe tu consulta..."
+            placeholder={t('aiInputPlaceholder')}
             className="flex-1 bg-stone-800 text-xs text-white placeholder-stone-400 px-3.5 py-2.5 rounded-full border border-stone-700 focus:outline-none focus:border-emerald-500"
           />
           <button

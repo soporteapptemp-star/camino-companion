@@ -1,0 +1,82 @@
+export const translations = {
+  es: {
+    greeting: "¡Buen Camino",
+    offlineMode: "Modo Offline Activo",
+    copilotCache: "Copiloto en caché",
+    sos: "SOS",
+    aiTitle: "Copiloto IA",
+    aiSubtitle: "Betanzos → Hospital de Bruma",
+    aiQuestion: "¿Dudas sobre la etapa u hostales?",
+    aiDescription: "Pregunta sobre agua, ampollas, menú o albergues",
+    aiInputPlaceholder: "Escribe tu consulta...",
+    aiHello: "¡Hola! Soy tu copiloto IA para el Camino Inglés. ¿En qué te puedo ayudar hoy?",
+    aiError: "Ups, no he podido procesar tu consulta ahora mismo.",
+    aiPrompts: [
+      "¿Dónde hay agua potable?",
+      "¿Dónde comer en Betanzos?",
+      "Consejos para ampollas"
+    ],
+    navOnRoute: "EN RUTA OFICIAL",
+    navCheckRoute: "COMPROBAR RUTA",
+    navOffRoute: "POSIBLE DESVÍO",
+    navActive: "Navegación Activa",
+    navFollow: "Sigue las flechas amarillas hacia",
+    navOffWarning: "Te has alejado del trazado. Revisa la pantalla del mapa para reconectar.",
+    gpsSearching: "Buscando GPS...",
+    gpsNoAccess: "Sin acceso GPS",
+    gpsPrecision: "GPS Precisión",
+    speed: "Velocidad",
+    totalStage: "Total Etapa",
+    difficulty: "Dificultad",
+    nextService: "Próximo servicio",
+    inMeters: "En",
+    meters: "metros",
+    tabs: {
+      inicio: "Inicio",
+      ruta: "Ruta",
+      lugares: "Lugares",
+      favoritos: "Favoritos",
+      ajustes: "Ajustes"
+    }
+  },
+  en: {
+    greeting: "Buen Camino",
+    offlineMode: "Offline Mode Active",
+    copilotCache: "Copilot cached",
+    sos: "SOS",
+    aiTitle: "AI Copilot",
+    aiSubtitle: "Betanzos → Hospital de Bruma",
+    aiQuestion: "Questions about the stage or hostels?",
+    aiDescription: "Ask about water, blisters, food, or hostels",
+    aiInputPlaceholder: "Ask a question...",
+    aiHello: "Hello! I am your AI copilot for the English Way. How can I help you today?",
+    aiError: "Oops, I couldn't process your request right now.",
+    aiPrompts: [
+      "Where can I find drinking water?",
+      "Where to eat in Betanzos?",
+      "Tips for blisters"
+    ],
+    navOnRoute: "OFFICIAL ROUTE",
+    navCheckRoute: "CHECK ROUTE",
+    navOffRoute: "POSSIBLE OFF-ROUTE",
+    navActive: "Active Navigation",
+    navFollow: "Follow the yellow arrows towards",
+    navOffWarning: "You have strayed from the route. Check the map to reconnect.",
+    gpsSearching: "Searching GPS...",
+    gpsNoAccess: "No GPS access",
+    gpsPrecision: "GPS Accuracy",
+    speed: "Speed",
+    totalStage: "Stage Distance",
+    difficulty: "Difficulty",
+    nextService: "Next service",
+    inMeters: "In",
+    meters: "meters",
+    tabs: {
+      inicio: "Home",
+      ruta: "Route",
+      lugares: "Places",
+      favoritos: "Favorites",
+      ajustes: "Settings"
+    }
+  }
+};
