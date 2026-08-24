@@ -229,7 +229,10 @@ export default function MapView() {
                 </span>
               </div>
 
-              <p className="text-stone-600 leading-tight text-[11px]">{poi.descripcion}</p>
+              {/* CORREGIDO I18N POPUP */}
+              <p className="text-stone-600 leading-tight text-[11px]">
+                {lang === 'en' && poi.descripcion_en ? poi.descripcion_en : poi.descripcion}
+              </p>
 
               {(poi.precio || poi.contacto?.telefono) && (
                 <div className="flex items-center justify-between text-[10px] bg-stone-50 p-1.5 rounded border border-stone-200/60 font-medium">

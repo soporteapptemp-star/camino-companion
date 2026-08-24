@@ -4,7 +4,7 @@ import { useFavorites } from '../../hooks/useFavorites';
 import { useLanguage } from '../../context/LanguageContext';
 
 export default function PoiCard({ poi }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const { isFavorite, toggleFavorite } = useFavorites();
   const favorite = isFavorite(poi.id);
 
@@ -66,8 +66,9 @@ export default function PoiCard({ poi }) {
             </span>
           )}
         </div>
+        {/* CORREGIDO I18N DESCRIPCIÓN */}
         <p className="text-xs text-stone-500 mt-1 line-clamp-2">
-          {poi.descripcion}
+          {lang === 'en' && poi.descripcion_en ? poi.descripcion_en : poi.descripcion}
         </p>
       </div>
 
@@ -87,11 +88,11 @@ export default function PoiCard({ poi }) {
             className="bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold px-3.5 py-1.5 rounded-full flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
           >
             <Phone size={12} />
-            <span>Llamar</span>
+            <span>{lang === 'en' ? 'Call' : 'Llamar'}</span>
           </a>
         ) : (
           <span className="text-[11px] font-semibold text-stone-400 bg-stone-100 px-2.5 py-1 rounded-full">
-            En Ruta
+            {lang === 'en' ? 'On Route' : 'En Ruta'}
           </span>
         )}
       </div>

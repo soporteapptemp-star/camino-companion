@@ -38,13 +38,19 @@ export default function CopilotCard({ distanceToGpx = 0, speed: propSpeed }) {
   };
 
   useEffect(() => {
-    if (nextIndication && nextIndication.texto) {
-      const text = lang === 'en' 
-        ? `In ${nextIndication.distanciaM} meters, follow indication`
-        : `En ${nextIndication.distanciaM} metros, ${nextIndication.texto}`;
-      speakAnnouncement(text);
+    if (nextIndication) {
+      const textToSpeak = lang === 'en' && nextIndication.texto_en 
+        ? nextIndication.texto_en 
+        : nextIndication.texto;
+
+      if (textToSpeak) {
+        const text = lang === 'en' 
+          ? `In ${nextIndication.distanciaM} meters, ${textToSpeak}`
+          : `En ${nextIndication.distanciaM} metros, ${textToSpeak}`;
+        speakAnnouncement(text);
+      }
     }
-  }, [nextIndication?.texto, isMuted, lang]);
+  }, [nextIndication, isMuted, lang]);
 
   const isSearching = gpsStatus === 'SEARCHING' || accuracy === null;
   const hasError = !!error;
@@ -178,7 +184,7 @@ export default function CopilotCard({ distanceToGpx = 0, speed: propSpeed }) {
         </div>
       </button>
 
-      {/* TARJETA 4: Siguiente Giro */}
+      {/* TARJETA 4: Siguiente Giro (CORREGIDO I18N) */}
       {nextIndication && (
         <div className="bg-slate-900 text-white rounded-2xl p-4 flex items-center gap-3 border border-slate-800">
           <div className="p-3 bg-emerald-900/80 rounded-xl text-emerald-400">
@@ -186,7 +192,9 @@ export default function CopilotCard({ distanceToGpx = 0, speed: propSpeed }) {
           </div>
           <div>
             <span className="text-[10px] font-bold text-emerald-400 uppercase block">{t('inMeters')} {nextIndication.distanciaM} {t('meters')}</span>
-            <p className="text-xs font-bold text-stone-100">{nextIndication.texto}</p>
+            <p className="text-xs font-bold text-stone-100">
+              {lang === 'en' && nextIndication.texto_en ? nextIndication.texto_en : nextIndication.texto}
+            </p>
           </div>
         </div>
       )}
